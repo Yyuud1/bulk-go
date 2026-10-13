@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f8fc">
+  <meta name="description" content="Bulk Go — siapkan CSV bulkpayment dari file Excel.">
+  <title>Bulk Go</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%233b72c9'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='34' fill='white'%3Eb%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css" rel="stylesheet">
+  <style>
+    :root{--blue:#3b72c9;--blue-dark:#2d5fae;--blue-soft:#edf4ff;--ink:#33435a;--muted:#8491a5;--line:#e7edf5;--bg:#f5f8fc;--white:#fff;--red:#b45c63;--amber:#9d7839;--green:#548473;--shadow:0 8px 32px #28426806}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Poppins,Arial,sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
+    button,input,select{font:inherit}button,a,input,select{-webkit-tap-highlight-color:transparent}
+    button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.46}button,a,input,select{outline:none}
+    :focus-visible{outline:3px solid #b8d1f4;outline-offset:3px}
+    button{transition:background .18s,color .18s,transform .18s,border-color .18s}
+    button:active:not(:disabled){transform:translateY(1px)}
+    i.fi{display:inline-flex;align-items:center;justify-content:center;line-height:1;font-size:19px;flex-shrink:0}
+    [hidden]{display:none!important}
+    .boot{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;transition:opacity .25s}
+    .boot-inner{display:flex;align-items:center;gap:13px;font-size:20px;font-weight:600;letter-spacing:-.8px}
+    .spinner{height:22px;width:22px;border:2px solid #dfe8f5;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+    .boot.done{opacity:0;pointer-events:none}
+    .shell{max-width:1180px;margin:auto;padding:0 30px 26px}
+    .topbar{height:88px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:600;letter-spacing:-.9px;white-space:nowrap}
+    .brand-mark{width:34px;height:34px;border-radius:11px;background:var(--blue);color:white;display:grid;place-items:center}
+    .brand-mark i{font-size:19px}.brand em{font-style:normal;color:var(--blue)}
+    .nav{display:flex;align-items:center;gap:8px}
+    .nav-btn{border:0;background:transparent;padding:9px 15px;color:var(--muted);border-radius:9px;font-size:15px;font-weight:500}
+    .nav-btn.active{background:var(--blue-soft);color:var(--blue)}.nav-btn:hover{color:var(--blue)}
+    .icon-btn{width:34px;height:34px;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--white);color:var(--muted)}
+    .icon-btn:hover{color:var(--blue);border-color:#cdddf2}
+    .intro{display:flex;justify-content:space-between;align-items:end;padding:38px 0 26px}
+    .eyebrow{font-size:13px;letter-spacing:2px;color:var(--blue);font-weight:600;margin-bottom:8px}
+    h1{font-weight:500;font-size:29px;letter-spacing:-1.2px;line-height:1.3;margin:0 0 9px}
+    .intro p{margin:0;color:var(--muted);font-size:15px}.date-chip{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;padding-bottom:3px}
+    .workspace{display:grid;grid-template-columns:316px minmax(0,1fr);gap:22px;align-items:start}
+    .workspace>*,.sidebar>*,.master-fields>*,.match-grid>*,.match-details>*{min-width:0;max-width:100%}
+    .sidebar{display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0;gap:18px}.card{background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    .sidebar>.card{width:100%;min-width:0}.file-info{min-width:0;max-width:100%}.file-info>.icon-btn{flex-shrink:0}.file-text small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .side-card{padding:22px}.card-title{display:flex;align-items:center;gap:9px;margin:0 0 18px;font-size:16px;font-weight:500}
+    .step-number{color:var(--blue);font-size:13px;background:var(--blue-soft);width:25px;height:25px;border-radius:8px;display:inline-grid;place-items:center;font-weight:600}
+    .dropzone{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:154px;border:1.5px dashed #cdddf1;border-radius:12px;background:#fafcff;padding:22px 12px;text-align:center;cursor:pointer;transition:background .2s,border-color .2s}
+    .dropzone:hover,.dropzone.dragging{background:var(--blue-soft);border-color:var(--blue)}
+    .upload-icon{width:42px;height:42px;border-radius:13px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;margin-bottom:4px}.upload-icon i{font-size:19px}
+    .dropzone strong{font-weight:500;font-size:15px}.dropzone span.hint{font-size:13px;color:var(--muted)}
+    .file-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+    .file-info{display:flex;align-items:center;gap:10px;background:#f7faff;border:1px solid var(--line);padding:12px;border-radius:11px;margin-top:12px}
+    .file-info>i{color:var(--blue)}.file-text{flex:1;min-width:0}.file-text strong{display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file-text small{font-size:13px;color:var(--muted)}
+    .subtle-btn{border:0;background:none;color:var(--blue);font-size:14px;padding:0;font-weight:500}.match-again{margin:13px 0 0;display:inline-flex;gap:6px;align-items:center}
+    .field{margin-bottom:17px}.field:last-child{margin-bottom:0}.field label{display:block;font-size:14px;font-weight:500;margin-bottom:7px}.field small{display:block;font-size:12px;color:var(--muted);line-height:1.65;margin-top:6px}
+    input,select{width:100%;height:41px;border:1px solid #e1e8f2;border-radius:10px;background:var(--white);padding:0 12px;color:var(--ink);transition:border-color .2s,box-shadow .2s}
+    input::placeholder{color:#b0bbca;font-size:14px}input:focus,select:focus{border-color:#8daee0;box-shadow:0 0 0 3px #edf4ff}
+    .input-action{position:relative}.input-action input{padding-right:44px;font-size:14px}.input-action button{position:absolute;right:5px;top:5px;width:31px;height:31px;border:0;background:var(--blue-soft);border-radius:7px;color:var(--blue)}
+    .field-note{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;padding-top:2px}.field-note i{font-size:15px}
+    .preview-card{width:100%;min-width:0;overflow:hidden;min-height:544px}.preview-header{display:flex;align-items:center;justify-content:space-between;padding:20px 23px 0;gap:10px}
+    .tabs{display:flex;gap:19px}.tab{border:0;border-bottom:2px solid transparent;padding:0 0 16px;background:none;color:var(--muted);font-size:15px;font-weight:500}.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+    .preview-header>.label{color:var(--muted);font-size:12px;margin-bottom:16px}.preview-body{border-top:1px solid var(--line)}
+    .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:459px;text-align:center;padding:30px}.empty-drawing{width:98px;height:98px;border-radius:28px;background:#f3f7fe;position:relative;margin:0 0 24px;display:grid;place-items:center}
+    .paper{width:47px;height:59px;border-radius:7px;background:var(--white);box-shadow:0 5px 14px #3958820a;transform:rotate(-7deg);border:1px solid #e0e9f7;padding:16px 10px;display:grid;gap:7px}.paper span{height:3px;background:#dce8f8;border-radius:3px}.paper span:last-child{width:65%}.paper-dot{position:absolute;bottom:13px;right:15px;width:27px;height:27px;border-radius:9px;background:#dce9fb;color:var(--blue);display:grid;place-items:center}.paper-dot i{font-size:14px}
+    .empty h2{font-size:17px;font-weight:500;margin:0 0 8px}.empty p{color:var(--muted);font-size:14px;line-height:1.9;margin:0;max-width:240px}
+    .summary{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:19px 23px;background:#fbfcff;border-bottom:1px solid var(--line)}
+    .summary small{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}.summary strong{font-size:17px;font-weight:500;letter-spacing:-.3px}.summary .total{text-align:right}.summary .total strong{color:var(--blue)}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 23px}.search{position:relative;max-width:225px;flex:1}.search input{height:33px;font-size:13px;padding-left:32px;background:#fafcff}.search i{position:absolute;left:11px;top:10px;font-size:15px;color:var(--muted)}
+    .toolbar-note{font-size:12px;color:var(--muted);text-align:right}.table-wrap{overflow:auto;width:100%}
+    table{border-collapse:collapse;width:100%;text-align:left;white-space:nowrap}th{font-size:12px;color:var(--muted);font-weight:500;background:#fafcff;padding:11px 17px;border-bottom:1px solid var(--line)}td{font-size:14px;padding:11px 17px;border-bottom:1px solid #eff3f8}th:first-child,td:first-child{padding-left:23px}th:last-child,td:last-child{padding-right:23px}.num{text-align:right;font-variant-numeric:tabular-nums}.account{font-variant-numeric:tabular-nums;letter-spacing:.3px}.recipient-name{max-width:220px;overflow:hidden;text-overflow:ellipsis}.row-number{color:#9ba9bc;font-size:13px}.duplicate{display:inline-block;width:5px;height:5px;background:#d3ae70;border-radius:50%;margin-left:7px;vertical-align:middle}.table-wrap.main-table{height:317px}thead{position:sticky;top:0;z-index:1}
+    .pagination{display:flex;align-items:center;justify-content:space-between;padding:13px 23px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}.pagination-actions{display:flex;align-items:center;gap:8px}.pagination-actions button{width:27px;height:27px;border:1px solid var(--line);background:var(--white);border-radius:7px;color:var(--muted)}.pagination-actions i{font-size:14px}.page-count{min-width:35px;text-align:center}
+    .csv-toolbar{display:flex;align-items:center;justify-content:space-between;padding:15px 23px;gap:9px}.segmented{display:flex;padding:3px;border:1px solid var(--line);border-radius:8px;background:#f8faff}.segmented button{background:none;border:0;font-size:12px;padding:5px 12px;border-radius:5px;color:var(--muted)}.segmented button.active{background:var(--white);color:var(--blue);box-shadow:0 1px 4px #21385508}.csv-filename{font-size:13px;color:var(--muted);max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .csv-text{height:317px;overflow:auto;margin:0;padding:16px 23px;background:#fcfdff;font:14px/1.9 ui-monospace,SFMono-Regular,Consolas,monospace;color:#50637d;border:0;white-space:pre;tab-size:2}.master-row td{background:#edf4ff;color:#3465ae}.csv-table td{font-size:13px}.csv-table th{font-size:12px}.csv-table .ref{font-family:ui-monospace,Consolas,monospace}
+    .export-bar{grid-column:2;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:0 1px;margin-top:-6px}.export-status{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:8px;line-height:1.7}.export-status i{font-size:15px}.export-status.ready{color:var(--green)}.export-status.error{color:var(--red)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;border-radius:10px;padding:11px 17px;font-size:14px;font-weight:500;white-space:nowrap}.btn-primary{background:var(--blue);color:var(--white);box-shadow:0 4px 12px #3b72c918}.btn-primary:hover:not(:disabled){background:var(--blue-dark)}.btn-secondary{background:var(--white);color:var(--muted);border-color:var(--line)}.btn-secondary:hover{color:var(--blue);border-color:#cdddf2}.btn i{font-size:16px}.export-actions{display:flex;gap:8px;margin-left:auto}
+    .footer{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:31px 0 22px;color:#9aa7b9;font-size:12px}.footer-left{display:flex;align-items:center;gap:7px}.footer i{font-size:13px}.footer a{color:inherit;text-decoration:none}.footer a:hover{color:var(--blue)}
+    .history-card{padding:23px;min-height:300px}.history-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:21px}.history-top h2{font-weight:500;font-size:18px;margin:0}.history-top p{font-size:13px;color:var(--muted);margin:5px 0 0}.history-table td:first-child{font-weight:500}.history-table .file-label{font-family:ui-monospace,Consolas,monospace;font-size:14px}.history-empty{padding:65px 20px;text-align:center;color:var(--muted);font-size:15px}.history-hint{color:var(--muted);font-size:13px;margin:15px 0 0;line-height:1.8}
+    .animate-in{animation:enter .45s ease both}.sidebar{animation-delay:.04s}.preview-card{animation-delay:.1s}.export-bar{animation-delay:.14s}
+    .swal2-popup{font-family:Poppins,Arial,sans-serif!important;border-radius:18px!important;color:var(--ink)!important;padding:24px!important;box-shadow:0 18px 80px #273c641a!important}.swal2-title{font-size:19px!important;font-weight:500!important;letter-spacing:-.5px!important;padding:0!important;text-align:left!important}.swal2-html-container{font-size:15px!important;line-height:1.8!important;margin:13px 0 0!important;text-align:left!important}.swal2-actions{margin-top:20px!important;gap:8px!important}.swal2-styled{font:500 14px Poppins,Arial,sans-serif!important;border-radius:9px!important;padding:11px 18px!important;margin:0!important}.swal2-styled{background-image:none!important}.swal2-confirm{background:var(--blue)!important}.swal2-cancel{background:#f1f5fa!important;color:#718198!important}.swal2-close{font-size:25px!important;color:#9ba8b9!important;top:12px!important;right:12px!important}.swal2-toast{padding:15px!important;border:1px solid var(--line)!important}.swal2-toast .swal2-title{font-size:14px!important;font-weight:400!important;letter-spacing:0!important}.swal2-timer-progress-bar{background:#c4d8f3!important}.swal2-icon{font-size:13px!important}
+    .match-caption{font-size:13px;color:var(--muted);margin:0 0 17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.match-grid{display:grid;grid-template-columns:1.25fr .75fr 1fr 1fr;gap:12px}.match-grid .field{margin-bottom:12px}.match-grid label{font-size:13px}.match-grid select,.match-grid input{font-size:14px;height:37px}.match-name{max-width:220px;margin:0 0 14px}.match-name label{font-size:13px}.match-name select{font-size:14px;height:35px}.match-table-box{border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:263px}.match-table{font-size:13px}.match-table th{white-space:normal;min-width:100px;max-width:210px;padding:9px 12px}.match-table td{padding:8px 12px;font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis}.match-table th:first-child,.match-table td:first-child{padding-left:12px;min-width:48px}.match-table th:last-child,.match-table td:last-child{padding-right:12px}.match-table .mapped{background:#edf4ff;color:#4779ba}.match-table .row-bad td{color:var(--red);background:#fff7f7}.match-table .row-ignored td{color:#a6b0bf;background:#fafbfd}.match-summary{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:12px 1px;font-size:13px;color:var(--muted)}.match-summary b{color:var(--ink);font-weight:500}.match-errors{background:#fff5f5;color:var(--red);font-size:13px;padding:10px 12px;border-radius:8px;line-height:1.9;margin-bottom:11px}.match-warning{background:#fffaf0;color:var(--amber);font-size:13px;padding:9px 12px;border-radius:8px;margin-bottom:10px}.match-check{display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.8;color:#65778f}.match-check input{width:15px;height:15px;flex-shrink:0;accent-color:var(--blue);margin:2px 0}.raw-pagination{display:flex;gap:6px;align-items:center;justify-content:end;margin-top:9px}.raw-pagination button{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--muted)}.raw-pagination span{font-size:12px;color:var(--muted);margin-right:5px}.confirm-summary{background:#f7faff;border:1px solid var(--line);padding:14px 16px;border-radius:11px;margin-top:10px}.confirm-row{display:flex;justify-content:space-between;gap:20px;font-size:14px;margin:7px 0}.confirm-row span{color:var(--muted)}.confirm-row strong{font-weight:500;text-align:right;overflow-wrap:anywhere}.help-list{margin:0;padding-left:19px}.help-list li{padding-bottom:9px;font-size:14px}.help-note{font-size:13px;color:var(--muted);margin:13px 0 0}.download-list{display:grid;gap:10px}.download-list button{width:100%;justify-content:center}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .match-details{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;margin-bottom:14px}.match-details .field{margin:0;max-width:none}.match-details label{font-size:13px}.match-details input,.match-details select{height:35px;font-size:14px}
+    @media(min-width:1300px){.intro{padding-top:45px}.preview-card{min-height:570px}.empty{min-height:485px}.table-wrap.main-table,.csv-text{height:343px}}
+    @media(max-width:900px){.workspace{grid-template-columns:285px minmax(0,1fr);gap:16px}.shell{padding:0 22px}.side-card{padding:18px}.preview-header,.summary,.table-toolbar,.csv-toolbar{padding-left:17px;padding-right:17px}.recipient-name{max-width:155px}.match-grid{grid-template-columns:1fr 1fr}.export-actions{gap:6px}.btn{padding:10px 13px}.intro h1{font-size:27px}}
+    @media(max-width:680px){.shell{padding:0 18px}.topbar{height:74px}.brand{font-size:19px;gap:9px}.brand-mark{width:30px;height:30px;border-radius:9px}.nav{gap:3px}.nav-btn{padding:8px 10px;font-size:13px}.nav .icon-btn{width:29px;height:29px;margin-left:3px}.intro{padding:27px 0 22px;align-items:start}.intro h1{font-size:25px}.intro p{font-size:13px}.eyebrow{font-size:11px}.date-chip{font-size:11px;gap:5px;padding-top:5px;max-width:96px;line-height:1.7}.date-chip i{font-size:14px}.workspace{grid-template-columns:1fr;gap:16px}.sidebar{grid-template-columns:1fr;gap:16px}.side-card{padding:19px}.dropzone{min-height:129px}.master-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.master-fields .field:first-child{grid-column:1/-1}.master-fields .field{margin-bottom:14px}.field-note{font-size:12px;line-height:1.7}.preview-card{min-height:465px}.empty{min-height:400px}.export-bar{grid-column:1;flex-direction:column;align-items:stretch;gap:12px;padding:2px 0 0}.export-actions .btn-primary{flex:1}.export-actions .btn-secondary{padding:11px 16px}.export-status{font-size:13px}.table-wrap.main-table,.csv-text{height:289px}.preview-header{padding-top:18px}.tab{font-size:14px}.preview-header>.label{font-size:11px}.summary strong{font-size:16px}.table-toolbar{padding:12px 15px}.toolbar-note{font-size:11px}.footer{padding-top:23px;font-size:11px}.footer-left{gap:5px}.match-grid{gap:9px}.swal2-popup{padding:19px!important}.swal2-title{font-size:17px!important}.match-table-box{max-height:225px}.match-summary{font-size:12px;gap:8px}.confirm-row{font-size:13px;gap:12px}.history-card{padding:18px}.history-table{min-width:580px}.history-top h2{font-size:17px}.history-top .btn{font-size:12px;padding:8px 10px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.spinner{border-color:#dfe8f5;border-top-color:var(--blue)}}
+  </style>
+</head>
+<body>
+  <div class="boot" id="boot" aria-label="Memuat Bulk Go"><div class="boot-inner"><span class="spinner" aria-hidden="true"></span><span>bulk <span style="color:var(--blue)">go.</span></span></div></div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark"><i class="fi fi-rr-paper-plane" aria-hidden="true"></i></span><span>bulk <em>go.</em></span></div>
+      <nav class="nav" aria-label="Menu utama">
+        <button class="nav-btn active" data-view="workspace" type="button" aria-current="page">Buat CSV</button>
+        <button class="nav-btn" data-view="history" type="button">Riwayat</button>
+        <button class="icon-btn" id="helpBtn" type="button" aria-label="Panduan singkat" title="Panduan singkat"><i class="fi fi-rr-interrogation" aria-hidden="true"></i></button>
+      </nav>
+    </header>
+    <main>
+      <div class="intro animate-in">
+        <div><div class="eyebrow">BULK PAYMENT</div><h1>Dari Excel ke CSV.</h1><p>Cocokkan data, periksa, lalu unduh.</p></div>
+        <div class="date-chip"><i class="fi fi-rr-calendar" aria-hidden="true"></i><time id="todayLabel"></time></div>
+      </div>
+      <section id="workspaceView" class="workspace" aria-label="Siapkan bulkpayment">
+        <div class="sidebar animate-in">
+          <section class="card side-card">
+            <h2 class="card-title"><span class="step-number">01</span> Data bendahara</h2>
+            <label class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Pilih file Excel bendahara">
+              <input class="file-input" id="fileInput" type="file" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" tabindex="-1">
+              <span class="upload-icon"><i class="fi fi-rr-cloud-upload-alt" aria-hidden="true"></i></span>
+              <strong id="uploadTitle">Pilih atau tarik file Excel</strong><span class="hint">XLSX, XLS, CSV · maks. 20 MB</span>
+            </label>
+            <div class="file-info" id="fileInfo" hidden><i class="fi fi-rr-document" aria-hidden="true"></i><div class="file-text"><strong id="fileName"></strong><small id="sheetLabel"></small></div><button class="icon-btn" id="replaceFileBtn" type="button" title="Ganti file" aria-label="Ganti file"><i class="fi fi-rr-refresh" aria-hidden="true"></i></button></div>
+            <button class="subtle-btn match-again" id="rematchBtn" type="button" hidden><i class="fi fi-rr-settings-sliders" aria-hidden="true"></i> Cocokkan ulang</button>
+          </section>
+          <section class="card side-card">
+            <h2 class="card-title"><span class="step-number">02</span> Master pembayaran</h2>
+            <div class="master-fields">
+              <div class="field"><label for="batchName">Nama file</label><div class="input-action"><input id="batchName" type="text" autocomplete="off" spellcheck="false" placeholder="607BPKAD…"><button id="generateNameBtn" type="button" title="Buat nama unik" aria-label="Buat nama file unik"><i class="fi fi-rr-magic-wand" aria-hidden="true"></i></button></div></div>
+              <div class="field"><label for="masterAccount">Rekening master</label><input id="masterAccount" type="text" autocomplete="off" spellcheck="false" placeholder="Rekening sumber dana"></div>
+              <div class="field"><label for="processDate">Tanggal proses</label><input id="processDate" type="text" readonly aria-label="Tanggal proses otomatis dalam format YYYYMMDD"></div>
+            </div>
+            
+          </section>
+        </div>
+        <section class="card preview-card animate-in" aria-label="Preview pembayaran">
+          <div class="preview-header"><div class="tabs" role="tablist"><button class="tab active" type="button" id="dataTab" role="tab" aria-selected="true" aria-controls="dataPanel">Data bendahara</button><button class="tab" type="button" id="csvTab" role="tab" aria-selected="false" aria-controls="csvPanel">Preview CSV</button></div><span class="label" id="previewLabel">Belum ada data</span></div>
+          <div class="preview-body">
+            <div class="empty" id="emptyState"><div class="empty-drawing" aria-hidden="true"><div class="paper"><span></span><span></span><span></span></div><span class="paper-dot"><i class="fi fi-rr-arrow-small-right"></i></span></div><h2>Mulai dari file bendahara.</h2><p>Data yang sudah dicocokkan akan tampil di sini.</p></div>
+            <div id="populatedState" hidden>
+              <div class="summary"><div><small>Penerima</small><strong id="recipientCount">0 rekening</strong></div><div class="total"><small>Total transfer</small><strong id="totalAmount">Rp0</strong></div></div>
+              <div id="dataPanel" role="tabpanel" aria-labelledby="dataTab">
+                <div class="table-toolbar"><div class="search"><i class="fi fi-rr-search" aria-hidden="true"></i><input id="searchInput" type="search" placeholder="Cari nama atau rekening" aria-label="Cari penerima"></div><span class="toolbar-note" id="dataNote"></span></div>
+                <div class="table-wrap main-table"><table><thead><tr><th>No.</th><th>Nama</th><th>Rekening</th><th class="num">Nominal</th></tr></thead><tbody id="dataBody"></tbody></table></div>
+                <div class="pagination"><span id="dataRange"></span><div class="pagination-actions"><button id="dataPrev" type="button" aria-label="Halaman data sebelumnya"><i class="fi fi-rr-angle-small-left" aria-hidden="true"></i></button><span class="page-count" id="dataPage"></span><button id="dataNext" type="button" aria-label="Halaman data berikutnya"><i class="fi fi-rr-angle-small-right" aria-hidden="true"></i></button></div></div>
+              </div>
+              <div id="csvPanel" role="tabpanel" aria-labelledby="csvTab" hidden>
+                <div class="csv-toolbar"><span id="csvFilename" class="csv-filename"></span><div class="segmented" aria-label="Tampilan CSV"><button class="active" id="csvTableBtn" type="button" aria-pressed="true">Tabel</button><button id="csvTextBtn" type="button" aria-pressed="false">Teks CSV</button></div></div>
+                <div class="table-wrap main-table" id="csvTableWrap"><table class="csv-table"><thead><tr><th>A · Referensi</th><th>B · Rekening</th><th>C</th><th class="num">D · Nominal</th><th>E · Tanggal</th></tr></thead><tbody id="csvBody"></tbody></table></div>
+                <pre class="csv-text" id="csvText" tabindex="0" aria-label="Isi CSV dengan pemisah koma" hidden></pre>
+                <div class="pagination"><span id="csvRange"></span><div class="pagination-actions" id="csvPagination"><button id="csvPrev" type="button" aria-label="Halaman CSV sebelumnya"><i class="fi fi-rr-angle-small-left" aria-hidden="true"></i></button><span class="page-count" id="csvPage"></span><button id="csvNext" type="button" aria-label="Halaman CSV berikutnya"><i class="fi fi-rr-angle-small-right" aria-hidden="true"></i></button></div><span id="csvFormatNote" hidden>Koma · 5 kolom · tanpa BOM</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="export-bar animate-in"><div class="export-status" id="exportStatus" aria-live="polite" hidden></div><div class="export-actions"><button class="btn btn-secondary" id="resetBtn" type="button">Reset</button><button class="btn btn-primary" id="downloadBtn" type="button" disabled><i class="fi fi-rr-download" aria-hidden="true"></i> Unduh CSV</button></div></div>
+      </section>
+      <section class="card history-card animate-in" id="historyView" aria-label="Riwayat unduhan" hidden>
+        <div class="history-top"><div><h2>Riwayat file</h2><p>Nama yang sudah dipakai di browser ini.</p></div><button class="btn btn-secondary" id="exportHistoryBtn" type="button"><i class="fi fi-rr-download" aria-hidden="true"></i> Simpan riwayat</button></div>
+        <div class="table-wrap"><table class="history-table"><thead><tr><th>Nama file</th><th>Diunduh (WIB)</th><th class="num">Penerima</th><th class="num">Total</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+        <div class="history-empty" id="historyEmpty">Belum ada CSV yang diunduh.</div>
+        <p class="history-hint" id="historyHint">Riwayat ini tidak terhubung ke T24 atau browser petugas lain.</p>
+      </section>
+    </main>
+  </div>
+  <noscript><p style="padding:25px;text-align:center">Aktifkan JavaScript untuk menggunakan Bulk Go.</p><style>.boot{display:none}</style></noscript>
+  <script id="bulkgo-app">
+    'use strict';
+
+    const $ = id => document.getElementById(id);
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const HISTORY_KEY = 'bulkgo.history.v1';
+    const PAGE_SIZE = 20;
+    const state = {workbook:null,file:null,mapping:null,rows:[],total:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1,reading:false,exporting:false};
+    let memoryHistory = [];
+    let storageAvailable = true;
+
+    function loadScript(url, globalName) {
+      return new Promise((resolve, reject) => {
+        if (window[globalName]) return resolve(window[globalName]);
+        const script = document.createElement('script');
+        const timer = setTimeout(() => reject(new Error('Koneksi ke pustaka tidak tersedia.')), 18000);
+        script.src = url;
+        script.async = true;
+        script.onload = () => {clearTimeout(timer); window[globalName] ? resolve(window[globalName]) : reject(new Error('Pustaka belum siap.'));};
+        script.onerror = () => {clearTimeout(timer); reject(new Error('Pustaka gagal dimuat.'));};
+        document.head.appendChild(script);
+      });
+    }
+
+    let swalReady = loadScript('https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js', 'Swal');
+    swalReady.catch(() => {});
+    let excelReady = null;
+
+    async function dialog(options) {
+      try {await swalReady;} catch {
+        if (!window.Swal) {
+          window.alert('Koneksi internet diperlukan untuk memuat SweetAlert. Muat ulang halaman lalu coba lagi.');
+          return {isConfirmed:false};
+        }
+      }
+      return Swal.fire({confirmButtonColor:'#3b72c9',cancelButtonColor:'#f1f5fa',buttonsStyling:true,reverseButtons:true,...options});
+    }
+
+    async function notify(message, icon = 'info') {
+      try {await swalReady;} catch {if (!window.Swal) {window.alert(message); return;}}
+      Swal.fire({toast:true,position:'top-end',icon,title:message,showConfirmButton:false,timer:4500,timerProgressBar:true,
+        didOpen: toast => {toast.addEventListener('mouseenter',Swal.stopTimer);toast.addEventListener('mouseleave',Swal.resumeTimer);}});
+    }
+
+    function wibParts(date = new Date()) {
+      return Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date).filter(x => x.type !== 'literal').map(x => [x.type,x.value]));
+    }
+    function dateCode(date = new Date()) {const p=wibParts(date); return p.year+p.month+p.day;}
+    function dateLabel(date = new Date()) {return new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'long',year:'numeric'}).format(date);}
+    function money(value) {return 'Rp'+BigInt(value).toLocaleString('id-ID');}
+    function plainMoney(value) {return BigInt(value).toLocaleString('id-ID');}
+    function cleanName(value) {return value.trim().replace(/\.csv$/i,'');}
+    function canonicalName(value) {return cleanName(value).toUpperCase();}
+    function normalizeHeader(value) {return String(value ?? '').toLowerCase().replace(/[\n\r_./()-]+/g,' ').replace(/\s+/g,' ').trim();}
+
+    function readHistory() {
+      try {
+        const raw=localStorage.getItem(HISTORY_KEY);
+        if (!raw) return memoryHistory;
+        const parsed=JSON.parse(raw);
+        if (!Array.isArray(parsed) || !parsed.every(x => x && typeof x.name==='string' && typeof x.total==='string' && /^\d+$/.test(x.total) && Number.isInteger(x.count) && x.count>=0 && typeof x.at==='string' && !Number.isNaN(Date.parse(x.at)))) throw new Error('Riwayat tidak valid.');
+        memoryHistory=parsed;
+        return parsed;
+      } catch {storageAvailable=false; return memoryHistory;}
+    }
+    function saveHistory(records) {
+      if (storageAvailable) {
+        try {localStorage.setItem(HISTORY_KEY,JSON.stringify(records));}
+        catch {storageAvailable=false;}
+      }
+      memoryHistory=records;
+      refreshStorageLabel();
+    }
+    function refreshStorageLabel() {
+      $('historyHint').textContent=storageAvailable?'Riwayat ini tidak terhubung ke T24 atau browser petugas lain.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';
+    }
+    function isUsed(name) {return readHistory().some(x=>canonicalName(x.name)===canonicalName(name));}
+    function suggestName() {
+      const p=wibParts();
+      const base='607BP'+p.day+p.month+p.year.slice(-2)+p.hour+p.minute+p.second;
+      let value=base, n=1;
+      while (isUsed(value)) value=base+'_'+String(n++).padStart(2,'0');
+      $('batchName').value=value;
+      refresh();
+    }
+
+    function cellValue(cell) {return cell?.v ?? '';}
+    function displayCell(cell) {
+      if (!cell) return '';
+      if (cell.w !== undefined) return String(cell.w);
+      if (cell.f && cell.v === undefined) return 'Rumus belum memiliki hasil';
+      return String(cell.v ?? '');
+    }
+    function cellAt(sheet,row,col) {return sheet[XLSX.utils.encode_cell({r:row,c:col})];}
+    function sheetBounds(sheet) {
+      if (!sheet['!ref']) return {s:{r:0,c:0},e:{r:0,c:0}};
+      const range=XLSX.utils.decode_range(sheet['!ref']);
+      if (range.e.r>=100000 || range.e.c>=256) throw new Error('Sheet terlalu besar. Gunakan salinan berisi tabel pembayaran saja (maks. 100.000 baris dan 256 kolom).');
+      return range;
+    }
+    function accountOf(cell) {
+      if (!cell || cell.v===undefined || cell.v===null || String(cell.v).trim()==='') return {error:'Rekening kosong'};
+      if (cell.t==='e') return {error:'Rekening berisi error Excel'};
+      if (cell.t==='n' || typeof cell.v==='number') {
+        const n=Number(cell.v);
+        if (!Number.isSafeInteger(n) || n<0 || String(n).length>15) return {error:'Rekening angka terlalu panjang; ubah sumber menjadi teks'};
+        const formatted=String(cell.w ?? '').trim();
+        return {value:/^\d+$/.test(formatted)?formatted:String(n)};
+      }
+      const value=String(cell.v).trim().replace(/^'/,'').replace(/[\s\u00a0-]/g,'');
+      if (!/^\d+$/.test(value)) return {error:'Rekening harus berupa digit, tanpa notasi ilmiah'};
+      return {value};
+    }
+    function amountOf(cell) {
+      if (!cell || cell.v===undefined || cell.v===null || String(cell.v).trim()==='') return {error:cell?.f?'Rumus nominal belum memiliki hasil':'Nominal kosong'};
+      if (cell.t==='e') return {error:'Nominal berisi error Excel'};
+      if (typeof cell.v==='number') {
+        if (!Number.isSafeInteger(cell.v)) return {error:'Nominal harus rupiah bulat dan tidak melebihi batas angka Excel'};
+        if (cell.v<=0) return {error:'Nominal harus lebih dari nol'};
+        return {value:BigInt(cell.v)};
+      }
+      let text=String(cell.v).trim().replace(/^(?:Rp\.?|IDR)\s*/i,'').replace(/[\s\u00a0]/g,'');
+      if (/^\(.*\)$/.test(text)) text='-'+text.slice(1,-1);
+      if (!/^-?\d[\d.,]*$/.test(text)) return {error:'Format nominal tidak dikenali'};
+      let integer=text;
+      if (text.includes('.') && text.includes(',')) {
+        const decimal=text.lastIndexOf('.')>text.lastIndexOf(',')?'.':',';
+        const group=decimal==='.'?',':'.';
+        const parts=text.split(decimal);
+        const grouped=parts[0];
+        if (parts.length!==2 || !/^0{1,2}$/.test(parts[1]) || !(new RegExp('^-?\\d{1,3}(?:\\'+group+'\\d{3})+$')).test(grouped)) return {error:'Periksa pemisah ribuan atau pecahan nominal'};
+        integer=grouped.split(group).join('');
+      } else if (/[.,]/.test(text)) {
+        const sep=text.includes('.')?'.':',';
+        const parts=text.split(sep);
+        if (parts.length===2 && /^0{1,2}$/.test(parts[1])) integer=parts[0];
+        else if (/^-?\d{1,3}$/.test(parts[0]) && parts.slice(1).every(x=>/^\d{3}$/.test(x))) integer=parts.join('');
+        else return {error:'Periksa pemisah ribuan atau pecahan nominal'};
+      }
+      if (!/^-?\d+$/.test(integer)) return {error:'Nominal tidak valid'};
+      const value=BigInt(integer);
+      if (value<=0n) return {error:'Nominal harus lebih dari nol'};
+      return {value};
+    }
+
+    function headerScore(value,type) {
+      const h=normalizeHeader(value);
+      if (type==='account') {
+        if (/nama|pemilik/.test(h)) return 0;
+        if (/^(?:nomor|no)\s*(?:rekening|rek)\b|^norek$|^no\s*rek$/.test(h)) return 14;
+        if (/account\s*(?:number|no)|beneficiary\s*account/.test(h)) return 13;
+        if (/rekening|\brek\b|account/.test(h)) return 10;
+      }
+      if (type==='amount') {
+        if (/potongan|bpjs|pajak|saldo/.test(h)) return 0;
+        if (/jumlah transfer|nominal transfer|transfer amount|amount to transfer/.test(h)) return 15;
+        if (/nominal|amount|nilai transfer|total bayar|jumlah bayar/.test(h)) return 12;
+        if (/jumlah bersih|gaji bersih|net/.test(h)) return 9;
+        if (/jumlah|transfer|gaji|nilai|pembayaran/.test(h)) return 6;
+      }
+      if (type==='name' && /nama|name/.test(h) && !/nomor|number/.test(h)) return 8;
+      return 0;
+    }
+    function guessColumns(sheet,header) {
+      const range=sheetBounds(sheet),result={account:-1,amount:-1,name:-1},scores={account:0,amount:0,name:0};
+      for (let c=range.s.c;c<=range.e.c;c++) {
+        for (const type of Object.keys(result)) {
+          const score=headerScore(cellValue(cellAt(sheet,header,c)),type);
+          if (score>scores[type]) {scores[type]=score;result[type]=c;}
+        }
+      }
+      return {...result,score:scores.account+scores.amount+(result.name>=0?2:0)};
+    }
+    function guessMapping(workbook) {
+      let best={sheet:workbook.SheetNames[0],header:0,account:-1,amount:-1,name:-1,score:-1};
+      for (const sheetName of workbook.SheetNames) {
+        const sheet=workbook.Sheets[sheetName];
+        let bounds;
+        try {bounds=sheetBounds(sheet);} catch {continue;}
+        for(let r=bounds.s.r;r<=Math.min(bounds.e.r,bounds.s.r+149);r++) {
+          const g=guessColumns(sheet,r);
+          if (g.score>best.score) best={sheet:sheetName,header:r,...g};
+        }
+      }
+      return {...best,...guessDataRange(workbook,best)};
+    }
+    function guessDataRange(workbook,mapping) {
+      const parsed=extractRows(workbook,{...mapping,startRow:undefined,endRow:undefined});
+      let first=Infinity,last=0;
+      for(const row of parsed.rows){first=Math.min(first,row.sourceRow);last=Math.max(last,row.sourceRow);}
+      for(const error of parsed.errors){if(error.row>mapping.header+1){first=Math.min(first,error.row);last=Math.max(last,error.row);}}
+      const bounds=sheetBounds(workbook.Sheets[mapping.sheet]);
+      return {startRow:Number.isFinite(first)?first:mapping.header+2,endRow:last||Math.max(mapping.header+2,bounds.e.r+1)};
+    }
+    function extractRows(workbook,mapping) {
+      const sheet=workbook.Sheets[mapping.sheet],bounds=sheetBounds(sheet);
+      const result={rows:[],errors:[],ignored:[],duplicates:[],total:0n,sourceTotal:null,totalMismatch:false,excluded:0};
+      if (mapping.account<0 || mapping.amount<0) return result;
+      if (mapping.account===mapping.amount) {result.errors.push({row:mapping.header+1,message:'Kolom rekening dan nominal harus berbeda'}); return result;}
+      const start=mapping.startRow??mapping.header+2,end=mapping.endRow??bounds.e.r+1;
+      if(!Number.isInteger(start)||!Number.isInteger(end)||start<=mapping.header+1||end<start||end>bounds.e.r+1){
+        result.errors.push({row:0,message:'Periksa rentang data. Mulai harus setelah baris judul, dan sampai tidak boleh melewati akhir sheet.'});
+        return result;
+      }
+      const sourceTotals=[],seen=new Map();
+      for(let r=mapping.header+1;r<=bounds.e.r;r++) {
+        const inRange=r+1>=start&&r+1<=end;
+        const accountCell=cellAt(sheet,r,mapping.account), amountCell=cellAt(sheet,r,mapping.amount);
+        const av=String(cellValue(accountCell)).trim(),mv=String(cellValue(amountCell)).trim();
+        let labels=[];
+        for(let c=bounds.s.c;c<=Math.min(bounds.e.c,bounds.s.c+7);c++) {
+          const value=cellValue(cellAt(sheet,r,c));
+          if (typeof value==='string' && value.trim()) labels.push(value.trim());
+        }
+        const isTotal=labels.some(s=>/^(?:grand\s+total|total(?:\s+(?:keseluruhan|transfer|pembayaran|bersih))?|jumlah(?:\s+(?:keseluruhan|transfer|pembayaran|bersih))?|sub\s*total)\s*[\s.:…-]*$/i.test(s));
+        if (isTotal && !/^\d+$/.test(av)) {
+          if(inRange)result.ignored.push(r+1);
+          const amount=amountOf(amountCell);
+          if (!amount.error && (inRange||r+1===end+1)) sourceTotals.push(amount.value);
+          continue;
+        }
+        if (!av && !mv && !amountCell?.f) continue;
+        if (headerScore(av,'account')>0 && headerScore(mv,'amount')>0) {if(inRange)result.ignored.push(r+1);continue;}
+        if (!av && !mv && amountCell?.f && !labels.length) continue;
+        const nameValue=mapping.name>=0?String(cellValue(cellAt(sheet,r,mapping.name))).trim():'';
+        const hasRowNumber=Array.from({length:Math.max(0,Math.min(mapping.account,mapping.amount,bounds.s.c+3)-bounds.s.c)},(_,i)=>cellValue(cellAt(sheet,r,bounds.s.c+i))).some(v=>typeof v==='number'&&Number.isInteger(v)&&v>0||typeof v==='string'&&/^\d+[.)]?$/.test(v.trim()));
+        const textNote=typeof amountCell?.v==='string'&&!amountCell.f&&/[A-Za-z]/.test(mv)&&!/^\s*(?:Rp\.?|IDR)/i.test(mv)&&!/^\s*[+\-\d(]/.test(mv);
+        const dateNote=amountCell?.t==='d'||!!amountCell?.z&&XLSX.SSF.is_date(amountCell.z);
+        const footerLabel=/^(?:NIP[\s.:]|(?:mengetahui|menyetujui|bendahara|pengguna anggaran|kuasa pengguna|kepala dinas|pemimpin|ttd|tanggal|catatan|keterangan)\b)/i.test(mv);
+        if(!av&&!hasRowNumber&&(footerLabel||(!nameValue&&(textNote||dateNote)))){if(inRange)result.ignored.push(r+1);continue;}
+        if(!inRange){result.excluded++;continue;}
+        const account=accountOf(accountCell), amount=amountOf(amountCell);
+        if (account.error || amount.error) {
+          result.errors.push({row:r+1,message:[account.error,amount.error].filter(Boolean).join(' · ')});
+          continue;
+        }
+        const record={index:result.rows.length+1,sourceRow:r+1,account:account.value,amount:amount.value,name:mapping.name>=0?displayCell(cellAt(sheet,r,mapping.name)).trim():''};
+        result.rows.push(record);result.total+=record.amount;
+        seen.set(record.account,(seen.get(record.account)||0)+1);
+      }
+      result.duplicates=[...seen].filter(([,count])=>count>1).map(([account,count])=>({account,count}));
+      if (sourceTotals.length===1) result.sourceTotal=sourceTotals[0];
+      result.totalMismatch=result.sourceTotal!==null&&result.sourceTotal!==result.total;
+      return result;
+    }
+
+    async function openMapping(workbook,file,initial) {
+      let mapping={...(initial||guessMapping(workbook))},rawPage=1,parsed=null,rangeEdited=!!initial;
+      if(mapping.startRow===undefined||mapping.endRow===undefined)mapping={...mapping,...guessDataRange(workbook,mapping)};
+      const html=`<p class="match-caption">${esc(file.name)}</p><div class="match-grid"><div class="field"><label for="mapSheet">Sheet</label><select id="mapSheet">${workbook.SheetNames.map(n=>`<option value="${esc(n)}" ${n===mapping.sheet?'selected':''}>${esc(n)}</option>`).join('')}</select></div><div class="field"><label for="mapHeader">Baris judul</label><input id="mapHeader" type="number" min="1" step="1" value="${mapping.header+1}"></div><div class="field"><label for="mapAccount">Kolom rekening</label><select id="mapAccount"></select></div><div class="field"><label for="mapAmount">Kolom nominal</label><select id="mapAmount"></select></div></div><div class="match-details"><div class="field"><label for="mapName">Nama penerima (opsional)</label><select id="mapName"></select></div><div class="field"><label for="mapStart">Mulai dari baris</label><input id="mapStart" type="number" min="1" step="1" value="${mapping.startRow}"></div><div class="field"><label for="mapEnd">Sampai baris</label><input id="mapEnd" type="number" min="1" step="1" value="${mapping.endRow}"></div></div><div class="match-table-box"><table class="match-table"><thead id="rawHead"></thead><tbody id="rawBody"></tbody></table></div><div class="raw-pagination"><span id="rawRange"></span><button id="rawPrev" type="button">Sebelumnya</button><button id="rawNext" type="button">Berikutnya</button></div><div id="matchSummary" class="match-summary"></div><div id="matchErrors" class="match-errors" hidden></div><div id="matchWarning" class="match-warning" hidden></div><label class="match-check"><input id="matchCheck" type="checkbox"><span>Rentang baris, rekening, nominal, dan jumlah penerima sudah sesuai.</span></label>`;
+      function fillColumns() {
+        const sheet=workbook.Sheets[mapping.sheet],bounds=sheetBounds(sheet);
+        const options=[];
+        for(let c=bounds.s.c;c<=bounds.e.c;c++) {
+          const letter=XLSX.utils.encode_col(c),label=displayCell(cellAt(sheet,mapping.header,c)).trim();
+          options.push(`<option value="${c}">${letter}${label?' · '+esc(label):''}</option>`);
+        }
+        for (const [id,key] of [['mapAccount','account'],['mapAmount','amount'],['mapName','name']]) {
+          $(id).innerHTML='<option value="-1">'+(key==='name'?'Tidak digunakan':'Pilih kolom')+'</option>'+options.join('');
+          $(id).value=String(mapping[key]);
+        }
+        $('mapHeader').max=String(bounds.e.r+1);
+        fillRange();
+      }
+      function fillRange() {
+        const bounds=sheetBounds(workbook.Sheets[mapping.sheet]);
+        for(const [id,key] of [['mapStart','startRow'],['mapEnd','endRow']]){
+          $(id).value=String(mapping[key]);$(id).min=String(mapping.header+2);$(id).max=String(bounds.e.r+1);
+        }
+      }
+      function renderRaw() {
+        const sheet=workbook.Sheets[mapping.sheet],bounds=sheetBounds(sheet),rowsPerPage=8;
+        const first=Math.max(mapping.header+2,Number.isInteger(mapping.startRow)?mapping.startRow:mapping.header+2);
+        const last=Math.min(bounds.e.r+1,Number.isInteger(mapping.endRow)?mapping.endRow:bounds.e.r+1);
+        const total=Math.max(0,last-first+1),pages=Math.max(1,Math.ceil(total/rowsPerPage));
+        rawPage=Math.min(Math.max(1,rawPage),pages);
+        const cols=new Set([mapping.account,mapping.amount,mapping.name].filter(c=>c>=0));
+        for(let c=bounds.s.c;c<=Math.min(bounds.e.c,bounds.s.c+11);c++) cols.add(c);
+        const columns=[...cols].sort((a,b)=>a-b),bad=new Set(parsed?.errors.map(e=>e.row)),ignored=new Set(parsed?.ignored);
+        $('rawHead').innerHTML='<tr><th>Baris</th>'+columns.map(c=>`<th class="${c===mapping.account||c===mapping.amount?'mapped':''}">${XLSX.utils.encode_col(c)} · ${esc(displayCell(cellAt(sheet,mapping.header,c))||'—')}</th>`).join('')+'</tr>';
+        const start=first-1+(rawPage-1)*rowsPerPage,end=Math.min(last,start+rowsPerPage);
+        const output=[];
+        for(let r=start;r<end;r++) output.push(`<tr class="${bad.has(r+1)?'row-bad':ignored.has(r+1)?'row-ignored':''}"><td>${r+1}</td>${columns.map(c=>`<td class="${c===mapping.account||c===mapping.amount?'mapped':''}" title="${esc(displayCell(cellAt(sheet,r,c)))}">${esc(displayCell(cellAt(sheet,r,c)))}</td>`).join('')}</tr>`);
+        $('rawBody').innerHTML=output.join('')||`<tr><td colspan="${columns.length+1}">Tidak ada baris data.</td></tr>`;
+        $('rawRange').textContent=total?'Baris '+(start+1)+'–'+end+' · '+rawPage+'/'+pages:'Tidak ada data';
+        $('rawPrev').disabled=rawPage<=1;$('rawNext').disabled=rawPage>=pages;
+      }
+      function updateMapping() {
+        $('matchCheck').checked=false;
+        try {
+          parsed=extractRows(workbook,mapping);
+          const missing=mapping.account<0||mapping.amount<0;
+          const errors=parsed.errors;
+          $('matchSummary').innerHTML=`<span>Baris <b>${esc(mapping.startRow)}–${esc(mapping.endRow)}</b> · <b>${parsed.rows.length}</b> penerima${parsed.ignored.length?' · '+parsed.ignored.length+' baris nontransaksi':''}</span><b>${money(parsed.total)}</b>`;
+          $('matchErrors').hidden=!missing&&!errors.length;
+          $('matchErrors').innerHTML=missing?'Pilih kolom rekening dan nominal.':errors.slice(0,5).map(e=>`${e.row?'Baris '+e.row+': ':''}${esc(e.message)}`).join('<br>')+(errors.length>5?'<br>Dan '+(errors.length-5)+' baris lain.':'');
+          const warnings=[];
+          if(parsed.duplicates.length) warnings.push(parsed.duplicates.length+' rekening muncul berulang. Setiap baris tetap menjadi transaksi terpisah.');
+          if(parsed.excluded)warnings.push(parsed.excluded+' baris data di luar rentang tidak akan diekspor.');
+          if(parsed.totalMismatch)warnings.push('Total rentang '+money(parsed.total)+' berbeda dari total sumber '+money(parsed.sourceTotal)+'. Pastikan rentang yang dipilih sudah sesuai.');
+          if(parsed.sourceTotal!==null&&parsed.sourceTotal===parsed.total&&!errors.length) warnings.push('Total sumber sesuai: '+money(parsed.sourceTotal)+'.');
+          $('matchWarning').hidden=!warnings.length;
+          $('matchWarning').textContent=warnings.join(' ');
+          $('matchCheck').disabled=missing||!!errors.length||!parsed.rows.length;
+          Swal.getConfirmButton().disabled=true;
+          renderRaw();
+        } catch(e) {
+          parsed=null;$('matchErrors').hidden=false;$('matchErrors').textContent=e.message;
+          $('matchCheck').disabled=true;Swal.getConfirmButton().disabled=true;
+        }
+      }
+      const answer=await dialog({title:'Cocokkan data',html,width:1040,showCancelButton:true,confirmButtonText:'Gunakan data',cancelButtonText:'Batal',showCloseButton:true,allowOutsideClick:false,
+        didOpen:()=>{
+          try {fillColumns();updateMapping();} catch(e) {$('matchErrors').hidden=false;$('matchErrors').textContent=e.message;Swal.getConfirmButton().disabled=true;}
+          $('mapSheet').addEventListener('change',()=>{
+            mapping.sheet=$('mapSheet').value;rawPage=1;rangeEdited=false;
+            try {mapping={...mapping,...guessMapping({SheetNames:[mapping.sheet],Sheets:workbook.Sheets})};$('mapHeader').value=mapping.header+1;fillColumns();updateMapping();}
+            catch(e){parsed=null;$('matchErrors').hidden=false;$('matchErrors').textContent=e.message;Swal.getConfirmButton().disabled=true;}
+          });
+          $('mapHeader').addEventListener('change',()=>{
+            const row=Number($('mapHeader').value),bounds=sheetBounds(workbook.Sheets[mapping.sheet]);
+            if(!Number.isInteger(row)||row<1||row>bounds.e.r+1){$('mapHeader').value=mapping.header+1;return;}
+            mapping.header=row-1;rangeEdited=false;mapping={...mapping,...guessColumns(workbook.Sheets[mapping.sheet],mapping.header)};mapping={...mapping,...guessDataRange(workbook,mapping)};rawPage=1;fillColumns();updateMapping();
+          });
+          for(const [id,key] of [['mapAccount','account'],['mapAmount','amount'],['mapName','name']]) $(id).addEventListener('change',()=>{mapping[key]=Number($(id).value);if(!rangeEdited)mapping={...mapping,...guessDataRange(workbook,mapping)};rawPage=1;fillRange();updateMapping();});
+          for(const [id,key] of [['mapStart','startRow'],['mapEnd','endRow']])for(const event of ['input','change'])$(id).addEventListener(event,()=>{mapping[key]=Number($(id).value);rangeEdited=true;rawPage=1;updateMapping();});
+          $('matchCheck').addEventListener('change',()=>{Swal.getConfirmButton().disabled=!$('matchCheck').checked||!parsed?.rows.length||!!parsed.errors.length;});
+          $('rawPrev').addEventListener('click',()=>{rawPage--;renderRaw();});$('rawNext').addEventListener('click',()=>{rawPage++;renderRaw();});
+        },
+        preConfirm:()=>{
+          const checked=$('matchCheck').checked;
+          parsed=extractRows(workbook,mapping);
+          if(!checked||!parsed.rows.length||parsed.errors.length){Swal.showValidationMessage('Periksa data dan tandai konfirmasi terlebih dahulu.');return false;}
+          return true;
+        }});
+      if(!answer.isConfirmed) return false;
+      Object.assign(state,{workbook,file,mapping:{...mapping},rows:parsed.rows,total:parsed.total,duplicates:parsed.duplicates,sourceTotal:parsed.sourceTotal,dataPage:1,csvPage:1,tab:'data'});
+      $('searchInput').value='';
+      refresh();
+      notify(parsed.rows.length+' penerima sudah dicocokkan.','success');
+      return true;
+    }
+
+    async function uploadFile(file) {
+      if(!file||state.reading||state.exporting) return;
+      if(!/\.(xlsx|xls|xlsm|xlsb|csv|ods)$/i.test(file.name)){notify('Pilih file Excel atau CSV.','error');return;}
+      if(file.size>20*1024*1024){notify('Ukuran file melebihi 20 MB.','error');return;}
+      state.reading=true;$('uploadTitle').textContent='Membaca file…';$('fileInput').disabled=true;
+      try {
+        if(!window.XLSX){if(!excelReady)excelReady=loadScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js','XLSX');await excelReady;}
+        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+        const bytes=await file.arrayBuffer();
+        const workbook=XLSX.read(bytes,{type:'array',raw:true,cellText:true,cellNF:true,cellDates:false});
+        if(!workbook.SheetNames.length) throw new Error('File tidak memiliki sheet yang dapat dibaca.');
+        await openMapping(workbook,file);
+      } catch(e) {
+        excelReady=null;
+        notify(e.message==='Koneksi ke pustaka tidak tersedia.'||e.message==='Pustaka gagal dimuat.'?'Pembaca Excel belum termuat. Periksa internet lalu unggah kembali.':e.message||'File tidak dapat dibaca.','error');
+      } finally {state.reading=false;$('uploadTitle').textContent='Pilih atau tarik file Excel';$('fileInput').disabled=false;$('fileInput').value='';}
+    }
+
+    function masterValues() {
+      return {name:cleanName($('batchName').value),account:$('masterAccount').value.trim().replace(/^'/,'').replace(/\s/g,'').toUpperCase(),date:dateCode()};
+    }
+    function validation() {
+      if(!state.rows.length) return {message:''};
+      const m=masterValues();
+      if(!m.name) return {message:'Isi nama file terlebih dahulu.'};
+      if(!/^[A-Za-z0-9_-]+$/.test(m.name)) return {message:'Nama file hanya boleh berisi huruf, angka, - atau _.',error:true};
+      if(isUsed(m.name)) return {message:'Nama ini sudah digunakan. Buat nama baru.',error:true};
+      if(!m.account) return {message:'Lengkapi rekening master.'};
+      if(!/^[A-Z0-9]+$/.test(m.account)) return {message:'Periksa rekening master; gunakan huruf atau digit.',error:true};
+      return {ready:true,message:'Siap diunduh · '+state.rows.length+' penerima'};
+    }
+    function csvRows(master = masterValues(),rows=state.rows,total=state.total) {
+      return [[master.name,master.account,'IDR',total.toString(),master.date],...rows.map((r,i)=>[master.name+'.'+String(i+1).padStart(3,'0'),r.account,'IDR',r.amount.toString(),master.date])];
+    }
+    function csvString(master = masterValues(),rows=state.rows,total=state.total) {
+      const all=csvRows(master,rows,total);
+      if(all.some(r=>r.length!==5||r.some(v=>/[\r\n,;:]/.test(v)))) throw new Error('Ada karakter yang tidak sesuai pada CSV.');
+      return all.map(r=>r.join(',')).join('\r\n')+'\r\n';
+    }
+
+    function refreshDates() {
+      const next=dateCode(),changed=$('processDate').value!==next;
+      $('processDate').value=next;$('todayLabel').textContent=dateLabel();
+      $('todayLabel').dateTime=next.slice(0,4)+'-'+next.slice(4,6)+'-'+next.slice(6);
+      if(changed&&state.rows.length) renderCsv();
+    }
+    function renderData() {
+      const search=$('searchInput').value.trim().toLowerCase();
+      const rows=state.rows.filter(r=>!search||r.name.toLowerCase().includes(search)||r.account.includes(search));
+      const pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));state.dataPage=Math.min(state.dataPage,pages);
+      const start=(state.dataPage-1)*PAGE_SIZE,shown=rows.slice(start,start+PAGE_SIZE),duplicates=new Set(state.duplicates.map(d=>d.account));
+      $('dataBody').innerHTML=shown.map(r=>`<tr title="${esc(state.mapping.sheet)} · baris ${r.sourceRow}"><td class="row-number">${r.index}</td><td class="recipient-name" title="${esc(r.name)}">${esc(r.name||'—')}</td><td class="account">${esc(r.account)}${duplicates.has(r.account)?'<span class="duplicate" title="Rekening berulang"></span>':''}</td><td class="num">${plainMoney(r.amount)}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:40px">Penerima tidak ditemukan.</td></tr>';
+      $('dataRange').textContent=rows.length?(start+1)+'–'+(start+shown.length)+' dari '+rows.length:'0 penerima';
+      $('dataPage').textContent=state.dataPage+' / '+pages;$('dataPrev').disabled=state.dataPage<=1;$('dataNext').disabled=state.dataPage>=pages;
+      $('dataNote').textContent='Baris '+state.mapping.startRow+'–'+state.mapping.endRow+(state.duplicates.length?' · '+state.duplicates.length+' rekening berulang':'');
+    }
+    function renderCsv() {
+      if(!state.rows.length) return;
+      const m=masterValues(),rows=csvRows(m),pages=Math.ceil(rows.length/PAGE_SIZE);state.csvPage=Math.min(state.csvPage,pages);
+      const start=(state.csvPage-1)*PAGE_SIZE,shown=rows.slice(start,start+PAGE_SIZE);
+      $('csvFilename').textContent=(m.name||'Nama file belum diisi')+(m.name?'.csv':'');
+      $('csvBody').innerHTML=shown.map((r,i)=>`<tr class="${start+i===0?'master-row':''}"><td class="ref">${esc(r[0]||'—')}</td><td class="account">${esc(r[1]||'—')}</td><td>IDR</td><td class="num">${esc(r[3])}</td><td>${r[4]}</td></tr>`).join('');
+      try {$('csvText').textContent=csvString(m);}catch{$('csvText').textContent='Perbaiki nama file dan rekening master untuk melihat teks CSV.';}
+      $('csvRange').textContent=(start+1)+'–'+(start+shown.length)+' dari '+rows.length+' baris';
+      $('csvPage').textContent=state.csvPage+' / '+pages;$('csvPrev').disabled=state.csvPage<=1;$('csvNext').disabled=state.csvPage>=pages;
+      $('csvTableWrap').hidden=state.csvView!=='table';$('csvText').hidden=state.csvView!=='text';$('csvPagination').hidden=state.csvView!=='table';$('csvFormatNote').hidden=state.csvView!=='text';
+      for(const [id,view] of [['csvTableBtn','table'],['csvTextBtn','text']]){$(id).classList.toggle('active',state.csvView===view);$(id).setAttribute('aria-pressed',String(state.csvView===view));}
+    }
+    function refresh() {
+      refreshDates();
+      const hasData=!!state.rows.length;
+      $('emptyState').hidden=hasData;$('populatedState').hidden=!hasData;$('fileInfo').hidden=!hasData;$('rematchBtn').hidden=!hasData;
+      $('previewLabel').textContent=hasData?'Sudah dicocokkan':'Belum ada data';
+      $('recipientCount').textContent=state.rows.length+' penerima';$('totalAmount').textContent=money(state.total);
+      $('fileName').textContent=state.file?.name||'';$('sheetLabel').textContent=state.mapping?state.mapping.sheet+' · baris '+state.mapping.startRow+'–'+state.mapping.endRow:'';
+      for(const [id,tab] of [['dataTab','data'],['csvTab','csv']]){$(id).classList.toggle('active',state.tab===tab);$(id).setAttribute('aria-selected',String(state.tab===tab));}
+      $('dataPanel').hidden=state.tab!=='data';$('csvPanel').hidden=state.tab!=='csv';
+      if(hasData){renderData();renderCsv();}
+      const check=validation();$('downloadBtn').disabled=!check.ready||state.exporting;
+      $('exportStatus').hidden=!check.message;
+      $('exportStatus').className='export-status'+(check.ready?' ready':check.error?' error':'');
+      $('exportStatus').innerHTML=`<i class="fi ${check.ready?'fi-rr-check-circle':check.error?'fi-rr-exclamation':'fi-rr-info'}" aria-hidden="true"></i><span>${esc(check.message)}</span>`;
+      refreshStorageLabel();
+    }
+    function renderHistory() {
+      const entries=[...readHistory()].reverse();
+      $('historyEmpty').hidden=!!entries.length;$('exportHistoryBtn').disabled=!entries.length;
+      $('historyBody').innerHTML=entries.map(x=>{
+        const at=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',dateStyle:'medium',timeStyle:'short'}).format(new Date(x.at));
+        return `<tr><td class="file-label">${esc(x.name)}.csv</td><td>${esc(at)}</td><td class="num">${x.count}</td><td class="num">${money(x.total)}</td></tr>`;
+      }).join('');refreshStorageLabel();
+    }
+    function saveDownload(content,name,type='text/csv;charset=utf-8') {
+      const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),30000);
+    }
+    async function downloadCsv() {
+      if(state.exporting) return;
+      refresh();const valid=validation();if(!valid.ready){notify(valid.message,'error');return;}
+      const m=masterValues();
+      const notes=[];
+      if(state.duplicates.length)notes.push(state.duplicates.length+' rekening berulang tetap diekspor sebagai transaksi terpisah.');
+      if(!storageAvailable)notes.push('Riwayat hanya tersedia selama sesi ini.');
+      state.exporting=true;$('downloadBtn').disabled=true;
+      try {
+        const answer=await dialog({title:'Unduh pembayaran?',html:`<div class="confirm-summary"><div class="confirm-row"><span>File</span><strong>${esc(m.name)}.csv</strong></div><div class="confirm-row"><span>Rekening master</span><strong>${esc(m.account)}</strong></div><div class="confirm-row"><span>Baris sumber</span><strong>${state.mapping.startRow}–${state.mapping.endRow}</strong></div><div class="confirm-row"><span>Penerima</span><strong>${state.rows.length}</strong></div><div class="confirm-row"><span>Total</span><strong>${money(state.total)}</strong></div><div class="confirm-row"><span>Tanggal</span><strong>${dateLabel()} · ${m.date}</strong></div></div>${notes.length?'<p class="help-note">'+esc(notes.join(' '))+'</p>':''}`,showCancelButton:true,confirmButtonText:'Unduh CSV',cancelButtonText:'Periksa lagi',allowOutsideClick:false});
+        if(!answer.isConfirmed)return;
+        if(dateCode()!==m.date){refreshDates();notify('Tanggal sudah berganti. Periksa preview lalu unduh kembali.','info');return;}
+        if(state.rows.length>999){
+          const extension=await dialog({title:'Nomor urut melebihi .999',text:'File ini memiliki '+state.rows.length+' penerima. Pastikan T24 menerima nomor urut .1000 dan seterusnya sebelum melanjutkan.',showCancelButton:true,confirmButtonText:'Lanjutkan',cancelButtonText:'Batal'});
+          if(!extension.isConfirmed)return;
+        }
+        const content=csvString(m);
+        const reserve=async()=>{
+          if(dateCode()!==m.date)throw new Error('Tanggal sudah berganti. Periksa preview lalu unduh kembali.');
+          if(isUsed(m.name))throw new Error('Nama file sudah digunakan. Buat nama baru.');
+          const records=[...readHistory(),{name:m.name,at:new Date().toISOString(),date:m.date,count:state.rows.length,total:state.total.toString()}];
+          saveHistory(records);
+          saveDownload(content,m.name+'.csv');
+        };
+        if(navigator.locks?.request)await navigator.locks.request('bulkgo-export',reserve);else await reserve();
+        renderHistory();
+        notify(storageAvailable?'CSV siap. Nama file tercatat di riwayat.':'CSV siap. Simpan riwayat sebelum menutup halaman.','success');
+        state.tab='csv';
+      } catch(e){notify(e.message||'CSV gagal disiapkan.','error');}
+      finally{state.exporting=false;refresh();}
+    }
+
+    async function resetWorkspace() {
+      if(state.reading||state.exporting)return;
+      if(state.rows.length){const answer=await dialog({title:'Mulai pembayaran baru?',text:'Data yang sedang dibuka akan dikosongkan. Riwayat nama file tetap tersimpan.',showCancelButton:true,confirmButtonText:'Reset',cancelButtonText:'Batal'});if(!answer.isConfirmed)return;}
+      Object.assign(state,{workbook:null,file:null,mapping:null,rows:[],total:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1});
+      $('masterAccount').value='';$('searchInput').value='';$('fileInput').value='';suggestName();refresh();
+    }
+
+    $('fileInput').addEventListener('change',e=>uploadFile(e.target.files[0]));
+    $('dropzone').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('fileInput').click();}});
+    $('replaceFileBtn').addEventListener('click',()=>$('fileInput').click());
+    for(const type of ['dragenter','dragover'])$('dropzone').addEventListener(type,e=>{e.preventDefault();$('dropzone').classList.add('dragging');});
+    for(const type of ['dragleave','drop'])$('dropzone').addEventListener(type,e=>{e.preventDefault();$('dropzone').classList.remove('dragging');});
+    $('dropzone').addEventListener('drop',e=>uploadFile(e.dataTransfer.files[0]));
+    window.addEventListener('dragover',e=>e.preventDefault());window.addEventListener('drop',e=>e.preventDefault());
+    $('rematchBtn').addEventListener('click',async()=>{if(!state.workbook||state.exporting||state.reading)return;state.reading=true;try{await openMapping(state.workbook,state.file,state.mapping);}finally{state.reading=false;}});
+    $('batchName').addEventListener('input',refresh);$('batchName').addEventListener('blur',()=>{$('batchName').value=cleanName($('batchName').value);refresh();});
+    $('masterAccount').addEventListener('input',refresh);$('masterAccount').addEventListener('blur',()=>{$('masterAccount').value=masterValues().account;refresh();});
+    $('generateNameBtn').addEventListener('click',suggestName);
+    $('dataTab').addEventListener('click',()=>{state.tab='data';refresh();});$('csvTab').addEventListener('click',()=>{state.tab='csv';refresh();});
+    $('csvTableBtn').addEventListener('click',()=>{state.csvView='table';renderCsv();});$('csvTextBtn').addEventListener('click',()=>{state.csvView='text';renderCsv();});
+    $('searchInput').addEventListener('input',()=>{state.dataPage=1;renderData();});
+    for(const [id,key,delta,render] of [['dataPrev','dataPage',-1,renderData],['dataNext','dataPage',1,renderData],['csvPrev','csvPage',-1,renderCsv],['csvNext','csvPage',1,renderCsv]])$(id).addEventListener('click',()=>{state[key]+=delta;render();});
+    $('downloadBtn').addEventListener('click',downloadCsv);$('resetBtn').addEventListener('click',resetWorkspace);
+    document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
+      const history=btn.dataset.view==='history';$('workspaceView').hidden=history;$('historyView').hidden=!history;
+      document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b===btn);if(b===btn)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+      if(history)renderHistory();
+    }));
+    $('exportHistoryBtn').addEventListener('click',()=>{
+      const history=readHistory();if(!history.length)return;
+      const content=JSON.stringify({app:'Bulk Go',exportedAt:new Date().toISOString(),files:history},null,2);
+      saveDownload(content,'bulkgo-riwayat-'+dateCode()+'.json','application/json');
+      notify('Riwayat disimpan.','success');
+    });
+    $('helpBtn').addEventListener('click',()=>dialog({title:'Cara pakai',html:'<ol class="help-list"><li>Unggah Excel, lalu periksa sheet, kolom rekening dan nominal, serta baris mulai dan akhir data.</li><li>Periksa jumlah penerima dan total. Tandai konfirmasi, lalu gunakan data.</li><li>Isi rekening master dan nama file unik. Periksa preview CSV, lalu unduh.</li></ol><p class="help-note">CSV memakai koma, 5 kolom, IDR, dan tanggal WIB saat unduh. Riwayat nama hanya berlaku di browser ini. File Excel tidak dikirim ke server.</p><p class="help-note">Jika ada beberapa kolom uang, pilih nominal yang memang akan ditransfer. Nominal pecahan tidak dibulatkan otomatis. Untuk Excel dengan rumus, simpan ulang di Excel agar hasil rumusnya tersedia. Bila rekening kehilangan nol di file sumber, perbaiki sumbernya dahulu.</p><p class="help-note">Koneksi internet diperlukan untuk pembaca Excel, SweetAlert, font Poppins, dan ikon Flaticon.</p>',confirmButtonText:'Mengerti',width:510}));
+    window.addEventListener('storage',e=>{if(e.key===HISTORY_KEY){refresh();if(!$('historyView').hidden)renderHistory();}});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+    setInterval(refreshDates,30000);
+    try{localStorage.setItem('bulkgo.storage-test','1');localStorage.removeItem('bulkgo.storage-test');}catch{storageAvailable=false;}
+    readHistory();suggestName();refresh();
+    setTimeout(()=>{$('boot').classList.add('done');setTimeout(()=>$('boot').remove(),280);},500);
+  </script>
+</body>
+</html>
