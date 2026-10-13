@@ -101,7 +101,7 @@
     </header>
     <main>
       <div class="intro animate-in">
-        <div><div class="eyebrow">BULK PAYMENT</div><h1>Dari Excel ke CSV.</h1><p>Cocokkan data, periksa, lalu unduh.</p></div>
+        <div><div class="eyebrow">BULK PAYMENT</div><h1>Excel to CSV.</h1><p></p></div>
         <div class="date-chip"><i class="fi fi-rr-calendar" aria-hidden="true"></i><time id="todayLabel"></time></div>
       </div>
       <section id="workspaceView" class="workspace" aria-label="Siapkan bulkpayment">
@@ -111,7 +111,7 @@
             <label class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Pilih file Excel bendahara">
               <input class="file-input" id="fileInput" type="file" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" tabindex="-1">
               <span class="upload-icon"><i class="fi fi-rr-cloud-upload-alt" aria-hidden="true"></i></span>
-              <strong id="uploadTitle">Pilih atau tarik file Excel</strong><span class="hint">XLSX, XLS, CSV · maks. 20 MB</span>
+              <strong id="uploadTitle">Pilih atau tarik file Excel</strong><span class="hint"></span>
             </label>
             <div class="file-info" id="fileInfo" hidden><i class="fi fi-rr-document" aria-hidden="true"></i><div class="file-text"><strong id="fileName"></strong><small id="sheetLabel"></small></div><button class="icon-btn" id="replaceFileBtn" type="button" title="Ganti file" aria-label="Ganti file"><i class="fi fi-rr-refresh" aria-hidden="true"></i></button></div>
             <button class="subtle-btn match-again" id="rematchBtn" type="button" hidden><i class="fi fi-rr-settings-sliders" aria-hidden="true"></i> Cocokkan ulang</button>
@@ -129,7 +129,7 @@
         <section class="card preview-card animate-in" aria-label="Preview pembayaran">
           <div class="preview-header"><div class="tabs" role="tablist"><button class="tab active" type="button" id="dataTab" role="tab" aria-selected="true" aria-controls="dataPanel">Data bendahara</button><button class="tab" type="button" id="csvTab" role="tab" aria-selected="false" aria-controls="csvPanel">Preview CSV</button></div><span class="label" id="previewLabel">Belum ada data</span></div>
           <div class="preview-body">
-            <div class="empty" id="emptyState"><div class="empty-drawing" aria-hidden="true"><div class="paper"><span></span><span></span><span></span></div><span class="paper-dot"><i class="fi fi-rr-arrow-small-right"></i></span></div><h2>Mulai dari file bendahara.</h2><p>Data yang sudah dicocokkan akan tampil di sini.</p></div>
+            <div class="empty" id="emptyState"><div class="empty-drawing" aria-hidden="true"><div class="paper"><span></span><span></span><span></span></div><span class="paper-dot"><i class="fi fi-rr-arrow-small-right"></i></span></div><h2>Mulai dari file bendahara.</h2><p></p></div>
             <div id="populatedState" hidden>
               <div class="summary"><div><small>Penerima</small><strong id="recipientCount">0 rekening</strong></div><div class="total"><small>Total transfer</small><strong id="totalAmount">Rp0</strong></div></div>
               <div id="dataPanel" role="tabpanel" aria-labelledby="dataTab">
@@ -663,7 +663,7 @@
       saveDownload(content,'bulkgo-riwayat-'+dateCode()+'.json','application/json');
       notify('Riwayat disimpan.','success');
     });
-    $('helpBtn').addEventListener('click',()=>dialog({title:'Cara pakai',html:'<ol class="help-list"><li>Unggah Excel, lalu periksa sheet, kolom rekening dan nominal, serta baris mulai dan akhir data.</li><li>Periksa jumlah penerima dan total. Tandai konfirmasi, lalu gunakan data.</li><li>Isi rekening master dan nama file unik. Periksa preview CSV, lalu unduh.</li></ol><p class="help-note">CSV memakai koma, 5 kolom, IDR, dan tanggal WIB saat unduh. Riwayat nama hanya berlaku di browser ini. File Excel tidak dikirim ke server.</p><p class="help-note">Jika ada beberapa kolom uang, pilih nominal yang memang akan ditransfer. Nominal pecahan tidak dibulatkan otomatis. Untuk Excel dengan rumus, simpan ulang di Excel agar hasil rumusnya tersedia. Bila rekening kehilangan nol di file sumber, perbaiki sumbernya dahulu.</p><p class="help-note">Koneksi internet diperlukan untuk pembaca Excel, SweetAlert, font Poppins, dan ikon Flaticon.</p>',confirmButtonText:'Mengerti',width:510}));
+    $('helpBtn').addEventListener('click',()=>dialog({title:'Cara pakai',html:'<ol class="help-list"><li>Unggah Excel, lalu periksa sheet, kolom rekening dan nominal, serta baris mulai dan akhir data.</li><li>Periksa jumlah penerima dan total. Tandai konfirmasi, lalu gunakan data.</li><li>Isi rekening master dan nama file unik. Periksa preview CSV, lalu unduh.</li></ol><p class="help-note"></p><p class="help-note"></p><p class="help-note">Koneksi internet diperlukan untuk pembaca Excel</p>',confirmButtonText:'Mengerti',width:510}));
     window.addEventListener('storage',e=>{if(e.key===HISTORY_KEY){refresh();if(!$('historyView').hidden)renderHistory();}});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
     setInterval(refreshDates,30000);
