@@ -175,7 +175,7 @@
         <div class="export-bar animate-in"><div class="export-status" id="exportStatus" aria-live="polite" hidden></div><div class="export-actions"><button class="btn btn-secondary" id="resetBtn" type="button">Reset</button><button class="btn btn-primary" id="downloadBtn" type="button" disabled><i class="fi fi-rr-download" aria-hidden="true"></i> Unduh CSV</button></div></div>
       </section>
       <section class="card history-card animate-in" id="historyView" aria-label="Riwayat unduhan" hidden>
-        <div class="history-top"><div><h2>Riwayat file</h2><p>Nama yang sudah dipakai di browser ini.</p></div><button class="btn btn-secondary" id="exportHistoryBtn" type="button"><i class="fi fi-rr-download" aria-hidden="true"></i> Simpan riwayat</button></div>
+        <div class="history-top"><div><h2>Riwayat file</h2><p id="historyDescription">Riwayat unduhan di semua perangkat.</p></div><button class="btn btn-secondary" id="exportHistoryBtn" type="button"><i class="fi fi-rr-download" aria-hidden="true"></i> Simpan riwayat</button></div>
         <div class="table-wrap"><table class="history-table"><thead><tr><th>Nama file</th><th>Diunduh (WIB)</th><th class="num">Penerima</th><th class="num">Total</th></tr></thead><tbody id="historyBody"></tbody></table></div>
         <div class="history-empty" id="historyEmpty">Belum ada CSV yang diunduh.</div>
         <div class="pagination history-pagination" id="historyPagination" hidden><span id="historyRange"></span><div class="pagination-actions"><button id="historyPrev" type="button" aria-label="Halaman riwayat sebelumnya"><i class="fi fi-rr-angle-small-left" aria-hidden="true"></i></button><span class="page-count" id="historyPage"></span><button id="historyNext" type="button" aria-label="Halaman riwayat berikutnya"><i class="fi fi-rr-angle-small-right" aria-hidden="true"></i></button></div></div>
@@ -198,6 +198,9 @@
     let memoryHistory = [];
     let storageAvailable = true;
     let historySyncing = false;
+    let historyRequestId = 0;
+    let historyConnectionError = false;
+    let historySource = 'local';
     const databaseReady = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(SUPABASE_URL) && !!SUPABASE_PUBLISHABLE_KEY;
 
     function loadScript(url, globalName) {
@@ -263,7 +266,8 @@
       refreshStorageLabel();
     }
     function refreshStorageLabel() {
-      $('historyHint').textContent=storageAvailable?'Riwayat ini tidak terhubung ke T24 atau browser petugas lain.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';
+      const pending=readHistory().filter(x=>x.eventId&&!x.syncedAt).length;
+      $('historyHint').textContent=historyConnectionError?'Riwayat bersama belum bisa dimuat. Untuk sementara ditampilkan riwayat browser ini.':databaseReady&&pending?`${pending} unduhan di browser ini belum terkirim ke database. Riwayat lokal ditampilkan sampai sinkronisasi berhasil.`:databaseReady?'Data baru dari perangkat lain muncul setelah halaman Riwayat dibuka atau dimuat ulang. Tidak terhubung ke T24.':storageAvailable?'Riwayat ini hanya tersimpan di browser ini.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';
     }
     async function syncHistory() {
       if(!databaseReady||historySyncing||!storageAvailable)return;
@@ -280,8 +284,8 @@
             saveHistory(readHistory().map(x=>x.eventId===item.eventId?{...x,syncedAt:new Date().toISOString()}:x));
           }catch{failed=true;break;}
         }
-      } finally {historySyncing=false;if(!$('historyView').hidden)renderHistory();else refreshStorageLabel();}
-      if(failed)notify('Riwayat tersimpan di browser, tetapi belum masuk database. Coba Sinkronkan nanti.','info');
+      } finally {historySyncing=false;if(!$('historyView').hidden)void renderHistory();else refreshStorageLabel();}
+      if(failed)notify('Riwayat tersimpan di browser, tetapi belum masuk database. Coba lagi saat koneksi tersedia.','info');
     }
     function isUsed(name) {return readHistory().some(x=>canonicalName(x.name)===canonicalName(name));}
     function suggestName() {
@@ -853,23 +857,62 @@
       $('exportStatus').innerHTML=`<i class="fi ${check.ready?'fi-rr-check-circle':check.error?'fi-rr-exclamation':'fi-rr-info'}" aria-hidden="true"></i><span>${esc(check.message)}</span>`;
       refreshStorageLabel();renderReferenceStatus();
     }
-    function renderHistory() {
-      const entries=[...readHistory()].reverse();
-      const pages=Math.max(1,Math.ceil(entries.length/HISTORY_PAGE_SIZE));
-      state.historyPage=Math.min(Math.max(1,state.historyPage),pages);
-      const start=(state.historyPage-1)*HISTORY_PAGE_SIZE;
-      const shown=entries.slice(start,start+HISTORY_PAGE_SIZE);
-      $('historyEmpty').hidden=!!entries.length;$('exportHistoryBtn').disabled=!entries.length;
+    function showHistoryPage(shown,total,start) {
+      const pages=Math.max(1,Math.ceil(total/HISTORY_PAGE_SIZE));
+      $('historyEmpty').textContent='Belum ada CSV yang diunduh.';
+      $('historyEmpty').hidden=!!total;$('exportHistoryBtn').disabled=!total;
       $('historyBody').innerHTML=shown.map(x=>{
         const at=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',dateStyle:'medium',timeStyle:'short'}).format(new Date(x.at));
         return `<tr><td class="file-label">${esc(x.name)}.csv</td><td>${esc(at)}</td><td class="num">${x.count}</td><td class="num">${money(x.total)}</td></tr>`;
       }).join('');
-      $('historyPagination').hidden=!entries.length;
-      $('historyRange').textContent=entries.length?(start+1)+'–'+(start+shown.length)+' dari '+entries.length+' file':'';
+      $('historyPagination').hidden=!total;
+      $('historyRange').textContent=total?(start+1)+'–'+(start+shown.length)+' dari '+total+' file':'';
       $('historyPage').textContent=state.historyPage+' / '+pages;
       $('historyPrev').disabled=state.historyPage<=1;
       $('historyNext').disabled=state.historyPage>=pages;
       refreshStorageLabel();
+    }
+    function showLocalHistory() {
+      const entries=[...readHistory()].reverse();
+      const pages=Math.max(1,Math.ceil(entries.length/HISTORY_PAGE_SIZE));
+      state.historyPage=Math.min(Math.max(1,state.historyPage),pages);
+      const start=(state.historyPage-1)*HISTORY_PAGE_SIZE;
+      historySource='local';
+      $('historyDescription').textContent='Riwayat unduhan di browser ini.';
+      showHistoryPage(entries.slice(start,start+HISTORY_PAGE_SIZE),entries.length,start);
+    }
+    async function renderHistory() {
+      const requestId=++historyRequestId;
+      if(!databaseReady||readHistory().some(x=>x.eventId&&!x.syncedAt)){showLocalHistory();return;}
+      const start=(state.historyPage-1)*HISTORY_PAGE_SIZE;
+      $('historyEmpty').textContent='Memuat riwayat bersama…';
+      $('historyEmpty').hidden=false;
+      $('historyBody').innerHTML='';
+      $('historyPagination').hidden=true;
+      $('exportHistoryBtn').disabled=true;
+      try {
+        const url=new URL(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/bulkgo_usage');
+        url.searchParams.set('select','file_name,downloaded_at,recipient_count,total_amount');
+        url.searchParams.set('order','created_at.desc,event_id.desc');
+        url.searchParams.set('limit',String(HISTORY_PAGE_SIZE));
+        url.searchParams.set('offset',String(start));
+        const response=await fetch(url.toString(),{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Prefer:'count=exact'}});
+        if(!response.ok)throw new Error('HTTP '+response.status);
+        const rows=await response.json();
+        const match=response.headers.get('Content-Range')?.match(/\/(\d+)$/);
+        if(!Array.isArray(rows)||!match)throw new Error('Format riwayat tidak valid.');
+        if(requestId!==historyRequestId)return;
+        const total=Number(match[1]);
+        if(start>=total&&state.historyPage>1){state.historyPage=Math.max(1,Math.ceil(total/HISTORY_PAGE_SIZE));void renderHistory();return;}
+        historyConnectionError=false;
+        historySource='shared';
+        $('historyDescription').textContent='Riwayat unduhan di semua perangkat.';
+        showHistoryPage(rows.map(x=>({name:x.file_name,at:x.downloaded_at,count:x.recipient_count,total:String(x.total_amount)})),total,start);
+      } catch {
+        if(requestId!==historyRequestId)return;
+        historyConnectionError=true;
+        showLocalHistory();
+      }
     }
     function saveDownload(content,name,type='text/csv;charset=utf-8') {
       const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -942,23 +985,44 @@
     $('dataBody').addEventListener('click',event=>{const button=event.target.closest('[data-edit-row]');if(button)editAccount(Number(button.dataset.editRow));});
     for(const [id,key,delta,render] of [['dataPrev','dataPage',-1,renderData],['dataNext','dataPage',1,renderData],['csvPrev','csvPage',-1,renderCsv],['csvNext','csvPage',1,renderCsv]])$(id).addEventListener('click',()=>{state[key]+=delta;render();});
     $('downloadBtn').addEventListener('click',downloadCsv);$('resetBtn').addEventListener('click',resetWorkspace);
-    $('historyPrev').addEventListener('click',()=>{if(state.historyPage>1){state.historyPage--;renderHistory();}});
-    $('historyNext').addEventListener('click',()=>{state.historyPage++;renderHistory();});
+    $('historyPrev').addEventListener('click',()=>{if(state.historyPage>1){state.historyPage--;void renderHistory();}});
+    $('historyNext').addEventListener('click',()=>{state.historyPage++;void renderHistory();});
     document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
       const history=btn.dataset.view==='history';$('workspaceView').hidden=history;$('historyView').hidden=!history;
       document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b===btn);if(b===btn)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
-      if(history){renderHistory();void syncHistory();}
+      if(history){void renderHistory();void syncHistory();}
     }));
-    $('exportHistoryBtn').addEventListener('click',()=>{
-      const history=readHistory();if(!history.length)return;
-      const content=JSON.stringify({app:'Bulk Go',exportedAt:new Date().toISOString(),files:history},null,2);
-      saveDownload(content,'bulkgo-riwayat-'+dateCode()+'.json','application/json');
-      notify('Riwayat disimpan.','success');
+    $('exportHistoryBtn').addEventListener('click',async()=>{
+      $('exportHistoryBtn').disabled=true;
+      try {
+        let history=readHistory();
+        if(historySource==='shared'&&databaseReady){
+          history=[];
+          for(let offset=0;;offset+=500){
+            const url=new URL(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/bulkgo_usage');
+            url.searchParams.set('select','file_name,downloaded_at,recipient_count,total_amount');
+            url.searchParams.set('order','created_at.desc,event_id.desc');
+            url.searchParams.set('limit','500');
+            url.searchParams.set('offset',String(offset));
+            const response=await fetch(url.toString(),{headers:{apikey:SUPABASE_PUBLISHABLE_KEY}});
+            if(!response.ok)throw new Error('Gagal mengambil riwayat bersama.');
+            const rows=await response.json();
+            if(!Array.isArray(rows))throw new Error('Format riwayat tidak valid.');
+            history.push(...rows.map(x=>({name:x.file_name,at:x.downloaded_at,count:x.recipient_count,total:String(x.total_amount)})));
+            if(rows.length<500)break;
+          }
+        }
+        if(!history.length)return;
+        const content=JSON.stringify({app:'Bulk Go',exportedAt:new Date().toISOString(),files:history},null,2);
+        saveDownload(content,'bulkgo-riwayat-'+dateCode()+'.json','application/json');
+        notify('Riwayat disimpan.','success');
+      }catch(e){notify(e.message||'Riwayat gagal disimpan.','error');}
+      finally{$('exportHistoryBtn').disabled=false;}
     });
     $('helpBtn').addEventListener('click',()=>dialog({title:'Cara pakai',html:'<ol class="help-list"><li>Isi cabang/kabupaten dan unggah laporan gaji sebagai acuan. Periksa sheet, kolom rekening, serta baris awal dan akhir. Hanya nomor rekening yang disimpan di browser ini.</li><li>Unggah Excel bendahara. Periksa kolom rekening, nominal, dan rentang baris. Rekening yang tidak ditemukan pada acuan akan berwarna merah di Data bendahara. Klik rekening untuk mengeditnya secara manual.</li><li>Jika ada pecahan nominal, aktifkan Bulatkan ke rupiah terdekat dan periksa preview. Isi rekening master dan nama file, lalu periksa CSV sebelum mengunduh.</li></ol><p class="help-note">Acuan bisa diganti untuk cabang lain. Koneksi internet diperlukan untuk pembaca Excel.</p>',confirmButtonText:'Mengerti',width:610}));
-    window.addEventListener('storage',e=>{if(e.key===HISTORY_KEY){refresh();if(!$('historyView').hidden)renderHistory();}});
-    window.addEventListener('online',()=>{void syncHistory();});
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+    window.addEventListener('storage',e=>{if(e.key===HISTORY_KEY){refresh();if(!$('historyView').hidden)void renderHistory();}});
+    window.addEventListener('online',()=>{void syncHistory();if(!$('historyView').hidden)void renderHistory();});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();if(!$('historyView').hidden)void renderHistory();}});
     setInterval(refreshDates,30000);
     try{localStorage.setItem('bulkgo.storage-test','1');localStorage.removeItem('bulkgo.storage-test');}catch{storageAvailable=false;}
     readHistory();suggestName();refresh();void syncHistory();
