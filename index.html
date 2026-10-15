@@ -176,7 +176,7 @@
         <div class="export-bar animate-in"><div class="export-status" id="exportStatus" aria-live="polite" hidden></div><div class="export-actions"><button class="btn btn-secondary" id="resetBtn" type="button">Reset</button><button class="btn btn-primary" id="downloadBtn" type="button" disabled><i class="fi fi-rr-download" aria-hidden="true"></i> Unduh CSV</button></div></div>
       </section>
       <section class="card history-card animate-in" id="historyView" aria-label="Riwayat unduhan" hidden>
-        <div class="history-top"><div><h2>Riwayat file</h2><p id="historyDescription">Riwayat unduhan di semua perangkat.</p></div><button class="btn btn-secondary" id="exportHistoryBtn" type="button"><i class="fi fi-rr-download" aria-hidden="true"></i> Simpan riwayat</button></div>
+        <div class="history-top"><div><h2>Riwayat file</h2><p id="historyDescription"></p></div><button class="btn btn-secondary" id="exportHistoryBtn" type="button"><i class="fi fi-rr-download" aria-hidden="true"></i> Simpan riwayat</button></div>
         <div class="table-wrap"><table class="history-table"><thead><tr><th>Nama file</th><th>Diunduh (WIB)</th><th class="num">Penerima</th><th class="num">Total</th></tr></thead><tbody id="historyBody"></tbody></table></div>
         <div class="history-empty" id="historyEmpty">Belum ada CSV yang diunduh.</div>
         <div class="pagination history-pagination" id="historyPagination" hidden><span id="historyRange"></span><div class="pagination-actions"><button id="historyPrev" type="button" aria-label="Halaman riwayat sebelumnya"><i class="fi fi-rr-angle-small-left" aria-hidden="true"></i></button><span class="page-count" id="historyPage"></span><button id="historyNext" type="button" aria-label="Halaman riwayat berikutnya"><i class="fi fi-rr-angle-small-right" aria-hidden="true"></i></button></div></div>
@@ -268,7 +268,7 @@
     }
     function refreshStorageLabel() {
       const pending=readHistory().filter(x=>x.eventId&&!x.syncedAt).length;
-      $('historyHint').textContent=historyConnectionError?'Riwayat bersama belum bisa dimuat. Untuk sementara ditampilkan riwayat browser ini.':databaseReady&&pending?`${pending} unduhan di browser ini belum terkirim ke database. Riwayat lokal ditampilkan sampai sinkronisasi berhasil.`:databaseReady?'Data baru dari perangkat lain muncul setelah halaman Riwayat dibuka atau dimuat ulang. Tidak terhubung ke T24.':storageAvailable?'Riwayat ini hanya tersimpan di browser ini.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';
+      $('historyHint').textContent=historyConnectionError?'Riwayat bersama belum bisa dimuat. Untuk sementara ditampilkan riwayat browser ini.':databaseReady&&pending?`${pending} unduhan di browser ini belum terkirim ke database. Riwayat lokal ditampilkan sampai sinkronisasi berhasil.`:databaseReady?'':storageAvailable?'Riwayat ini hanya tersimpan di browser ini.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';
     }
     async function syncHistory() {
       if(!databaseReady||historySyncing||!storageAvailable)return;
@@ -909,7 +909,7 @@
         if(start>=total&&state.historyPage>1){state.historyPage=Math.max(1,Math.ceil(total/HISTORY_PAGE_SIZE));void renderHistory();return;}
         historyConnectionError=false;
         historySource='shared';
-        $('historyDescription').textContent='Riwayat unduhan di semua perangkat.';
+        $('historyDescription').textContent='';
         showHistoryPage(rows.map(x=>({name:x.file_name,at:x.downloaded_at,count:x.recipient_count,total:String(x.total_amount)})),total,start);
       } catch {
         if(requestId!==historyRequestId)return;
