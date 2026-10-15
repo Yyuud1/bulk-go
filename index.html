@@ -98,7 +98,7 @@
     .match-details{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;margin-bottom:14px}.match-details .field{margin:0;max-width:none}.match-details label{font-size:13px}.match-details input,.match-details select{height:35px;font-size:14px}
     @media(min-width:1300px){.intro{padding-top:45px}.preview-card{min-height:570px}.empty{min-height:485px}.table-wrap.main-table,.csv-text{height:343px}}
     @media(max-width:900px){.workspace{grid-template-columns:285px minmax(0,1fr);gap:16px}.shell{padding:0 22px}.side-card{padding:18px}.preview-header,.summary,.table-toolbar,.csv-toolbar{padding-left:17px;padding-right:17px}.recipient-name{max-width:155px}.match-grid{grid-template-columns:1fr 1fr}.export-actions{gap:6px}.btn{padding:10px 13px}.intro h1{font-size:27px}}
-    @media(max-width:680px){.shell{padding:0 18px}.topbar{height:74px}.brand{font-size:19px;gap:9px}.brand-mark{width:30px;height:30px;border-radius:9px}.nav{gap:3px}.nav-btn{padding:8px 10px;font-size:13px}.nav .icon-btn{width:29px;height:29px;margin-left:3px}.intro{padding:27px 0 22px;align-items:start}.intro h1{font-size:25px}.intro p{font-size:13px}.eyebrow{font-size:11px}.date-chip{font-size:11px;gap:5px;padding-top:5px;max-width:96px;line-height:1.7}.date-chip i{font-size:14px}.workspace{grid-template-columns:1fr;gap:16px}.sidebar{grid-template-columns:1fr;gap:16px}.side-card{padding:19px}.dropzone{min-height:129px}.master-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.master-fields .field:first-child{grid-column:1/-1}.master-fields .field{margin-bottom:14px}.field-note{font-size:12px;line-height:1.7}.preview-card{min-height:465px}.empty{min-height:400px}.export-bar{grid-column:1;flex-direction:column;align-items:stretch;gap:12px;padding:2px 0 0}.export-actions .btn-primary{flex:1}.export-actions .btn-secondary{padding:11px 16px}.export-status{font-size:13px}.table-wrap.main-table,.csv-text{height:289px}.preview-header{padding-top:18px}.tab{font-size:14px}.preview-header>.label{font-size:11px}.summary strong{font-size:16px}.table-toolbar{padding:12px 15px}.toolbar-note{font-size:11px}.footer{padding-top:23px;font-size:11px}.footer-left{gap:5px}.match-grid{gap:9px}.swal2-popup{padding:19px!important}.swal2-title{font-size:17px!important}.match-table-box{max-height:225px}.match-summary{font-size:12px;gap:8px}.confirm-row{font-size:13px;gap:12px}.history-card{padding:18px}.history-table{min-width:580px}.history-top h2{font-size:17px}.history-top .btn{font-size:12px;padding:8px 10px}}
+    @media(max-width:680px){.shell{padding:0 18px}.topbar{height:74px}.brand{font-size:19px;gap:9px}.brand-mark{width:30px;height:30px;border-radius:9px}.nav{gap:3px}.nav-btn{padding:8px 10px;font-size:13px}.nav .icon-btn{width:29px;height:29px;margin-left:3px}.intro h1{font-size:25px}.intro p{font-size:13px}.eyebrow{font-size:11px}.date-chip{font-size:11px;gap:5px;padding-top:5px;max-width:96px;line-height:1.7}.date-chip i{font-size:14px}.workspace{grid-template-columns:1fr;gap:16px}.sidebar{grid-template-columns:1fr;gap:16px}.side-card{padding:19px}.dropzone{min-height:129px}.master-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.master-fields .field:first-child{grid-column:1/-1}.master-fields .field{margin-bottom:14px}.field-note{font-size:12px;line-height:1.7}.preview-card{min-height:465px}.empty{min-height:400px}.export-bar{grid-column:1;flex-direction:column;align-items:stretch;gap:12px;padding:2px 0 0}.export-actions .btn-primary{flex:1}.export-actions .btn-secondary{padding:11px 16px}.export-status{font-size:13px}.table-wrap.main-table,.csv-text{height:289px}.preview-header{padding-top:18px}.tab{font-size:14px}.preview-header>.label{font-size:11px}.summary strong{font-size:16px}.table-toolbar{padding:12px 15px}.toolbar-note{font-size:11px}.footer{padding-top:23px;font-size:11px}.footer-left{gap:5px}.match-grid{gap:9px}.swal2-popup{padding:19px!important}.swal2-title{font-size:17px!important}.match-table-box{max-height:225px}.match-summary{font-size:12px;gap:8px}.confirm-row{font-size:13px;gap:12px}.history-card{padding:18px}.history-table{min-width:580px}.history-top h2{font-size:17px}.history-top .btn{font-size:12px;padding:8px 10px}}
     @media(max-width:900px){.reference-card{grid-template-columns:minmax(150px,1fr) minmax(170px,1fr);gap:12px 18px}.reference-controls{grid-column:1/-1;flex-direction:row;align-items:center;flex-wrap:wrap;gap:9px 16px}}
     @media(max-width:680px){.ref-map-fields{grid-template-columns:1fr 1fr}.ref-map-fields .field:first-child,.ref-map-fields .field:nth-child(3){grid-column:1/-1}}
     @media(max-width:680px){.reference-card{grid-template-columns:1fr;gap:13px;padding:19px}.reference-controls{grid-column:auto;align-items:flex-start;flex-direction:column;gap:7px}.reference-branch.field{width:100%}.reference-actions .btn{padding:9px 12px}}
@@ -145,7 +145,7 @@
           <section class="card side-card">
             <h2 class="card-title"><span class="step-number">02</span> Master pembayaran</h2>
             <div class="master-fields">
-              <div class="field"><label for="batchName">Nama file</label><div class="input-action"><input id="batchName" type="text" autocomplete="off" spellcheck="false" placeholder="607BPKAD…"><button id="generateNameBtn" type="button" title="Buat nama unik" aria-label="Buat nama file unik"><i class="fi fi-rr-magic-wand" aria-hidden="true"></i></button></div></div>
+              <div class="field"><label for="batchName">Nama file</label><div class="input-action"><input id="batchName" type="text" maxlength="150" autocomplete="off" spellcheck="false" placeholder="607BPKAD…"><button id="generateNameBtn" type="button" title="Buat nama unik" aria-label="Buat nama file unik"><i class="fi fi-rr-magic-wand" aria-hidden="true"></i></button></div></div>
               <div class="field"><label for="masterAccount">Rekening master</label><input id="masterAccount" type="text" autocomplete="off" spellcheck="false" placeholder="Rekening sumber dana"></div>
               <div class="field"><label for="processDate">Tanggal proses</label><input id="processDate" type="text" readonly aria-label="Tanggal proses otomatis dalam format YYYYMMDD"></div>
             </div>
@@ -190,11 +190,15 @@
     const $ = id => document.getElementById(id);
     const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const HISTORY_KEY = 'bulkgo.history.v1';
+    const SUPABASE_URL = 'https://qlhlslgjuusmumgdjfmz.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_YzL1B8w7DCdR6-m7oT61eA_MStXLNGV';
     const PAGE_SIZE = 20;
     const HISTORY_PAGE_SIZE = 10;
     const state = {reference:null,referenceSet:new Set(),referenceReady:false,workbook:null,file:null,mapping:null,rows:[],total:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1,historyPage:1,reading:false,exporting:false};
     let memoryHistory = [];
     let storageAvailable = true;
+    let historySyncing = false;
+    const databaseReady = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(SUPABASE_URL) && !!SUPABASE_PUBLISHABLE_KEY;
 
     function loadScript(url, globalName) {
       return new Promise((resolve, reject) => {
@@ -260,6 +264,24 @@
     }
     function refreshStorageLabel() {
       $('historyHint').textContent=storageAvailable?'Riwayat ini tidak terhubung ke T24 atau browser petugas lain.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';
+    }
+    async function syncHistory() {
+      if(!databaseReady||historySyncing||!storageAvailable)return;
+      historySyncing=true;refreshStorageLabel();
+      let failed=false;
+      try {
+        for(const item of readHistory().filter(x=>x.eventId&&!x.syncedAt)) {
+          try {
+            const response=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/bulkgo_usage',{
+              method:'POST',headers:{apikey:SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
+              body:JSON.stringify({event_id:item.eventId,file_name:item.name,recipient_count:item.count,total_amount:item.total,downloaded_at:item.at})
+            });
+            if(!response.ok&&response.status!==409)throw new Error('HTTP '+response.status);
+            saveHistory(readHistory().map(x=>x.eventId===item.eventId?{...x,syncedAt:new Date().toISOString()}:x));
+          }catch{failed=true;break;}
+        }
+      } finally {historySyncing=false;if(!$('historyView').hidden)renderHistory();else refreshStorageLabel();}
+      if(failed)notify('Riwayat tersimpan di browser, tetapi belum masuk database. Coba Sinkronkan nanti.','info');
     }
     function isUsed(name) {return readHistory().some(x=>canonicalName(x.name)===canonicalName(name));}
     function suggestName() {
@@ -766,6 +788,7 @@
       if(!state.referenceReady) return {message:'Memuat acuan rekening…'};
       const m=masterValues();
       if(!m.name) return {message:'Isi nama file terlebih dahulu.'};
+      if(m.name.length>150) return {message:'Nama file maksimal 150 karakter.',error:true};
       if(!/^[A-Za-z0-9_-]+$/.test(m.name)) return {message:'Nama file hanya boleh berisi huruf, angka, - atau _.',error:true};
       if(isUsed(m.name)) return {message:'Nama ini sudah digunakan. Buat nama baru.',error:true};
       if(!m.account) return {message:'Lengkapi rekening master.'};
@@ -878,13 +901,14 @@
         const reserve=async()=>{
           if(dateCode()!==m.date)throw new Error('Tanggal sudah berganti. Periksa preview lalu unduh kembali.');
           if(isUsed(m.name))throw new Error('Nama file sudah digunakan. Buat nama baru.');
-          const records=[...readHistory(),{name:m.name,at:new Date().toISOString(),date:m.date,count:state.rows.length,total:state.total.toString()}];
+          const records=[...readHistory(),{eventId:crypto.randomUUID(),name:m.name,at:new Date().toISOString(),date:m.date,count:state.rows.length,total:state.total.toString()}];
           saveHistory(records);
           saveDownload(content,m.name+'.csv');
         };
         if(navigator.locks?.request)await navigator.locks.request('bulkgo-export',reserve);else await reserve();
         state.historyPage=1;
         renderHistory();
+        void syncHistory();
         notify(storageAvailable?'CSV siap. Nama file tercatat di riwayat.':'CSV siap. Simpan riwayat sebelum menutup halaman.','success');
         state.tab='csv';
       } catch(e){notify(e.message||'CSV gagal disiapkan.','error');}
@@ -923,7 +947,7 @@
     document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
       const history=btn.dataset.view==='history';$('workspaceView').hidden=history;$('historyView').hidden=!history;
       document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b===btn);if(b===btn)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
-      if(history)renderHistory();
+      if(history){renderHistory();void syncHistory();}
     }));
     $('exportHistoryBtn').addEventListener('click',()=>{
       const history=readHistory();if(!history.length)return;
@@ -933,10 +957,11 @@
     });
     $('helpBtn').addEventListener('click',()=>dialog({title:'Cara pakai',html:'<ol class="help-list"><li>Isi cabang/kabupaten dan unggah laporan gaji sebagai acuan. Periksa sheet, kolom rekening, serta baris awal dan akhir. Hanya nomor rekening yang disimpan di browser ini.</li><li>Unggah Excel bendahara. Periksa kolom rekening, nominal, dan rentang baris. Rekening yang tidak ditemukan pada acuan akan berwarna merah di Data bendahara. Klik rekening untuk mengeditnya secara manual.</li><li>Jika ada pecahan nominal, aktifkan Bulatkan ke rupiah terdekat dan periksa preview. Isi rekening master dan nama file, lalu periksa CSV sebelum mengunduh.</li></ol><p class="help-note">Acuan bisa diganti untuk cabang lain. Koneksi internet diperlukan untuk pembaca Excel.</p>',confirmButtonText:'Mengerti',width:610}));
     window.addEventListener('storage',e=>{if(e.key===HISTORY_KEY){refresh();if(!$('historyView').hidden)renderHistory();}});
+    window.addEventListener('online',()=>{void syncHistory();});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
     setInterval(refreshDates,30000);
     try{localStorage.setItem('bulkgo.storage-test','1');localStorage.removeItem('bulkgo.storage-test');}catch{storageAvailable=false;}
-    readHistory();suggestName();refresh();
+    readHistory();suggestName();refresh();void syncHistory();
     setTimeout(()=>{$('boot').classList.add('done');setTimeout(()=>$('boot').remove(),280);},500);
   </script>
 </body>
