@@ -278,7 +278,7 @@
         if(!state.rows.length)return {key:'welcome',message:'Halo! Mulai dengan file bendahara, ya.'};
         if(unmatchedCount())return {key:batch+':missing',message:'Ada rekening merah. Periksa di Data bendahara sebelum mengunduh, ya.'};
         if(validation().ready)return {key:batch+':ready',message:'CSV sudah siap. Periksa preview, lalu unduh.'};
-        return {key:batch+':review',message:'Data sudah masuk. Lengkapi form master dan periksa preview, ya.'};
+        return {key:batch+':review',message:'csv sukses diunduh, buka kembali file CSV yg sudah diunduh lalu ketik "ctrl + S" ya'};
       }
       function position() {
         const rect=face.getBoundingClientRect(),width=Math.min(264,window.innerWidth-32);
