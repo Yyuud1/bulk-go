@@ -141,6 +141,15 @@
     .companion-bubble::before{content:"";position:absolute;top:-5px;left:calc(var(--tip-x,24px) - 5px);width:9px;height:9px;background:var(--white);border-left:1px solid #dfe8f7;border-top:1px solid #dfe8f7;transform:rotate(45deg)}
     .companion-bubble p{margin:0}.companion-close{position:absolute;right:6px;top:7px;width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--muted);font:20px/1 Arial,sans-serif}.companion-close:hover{color:var(--blue);background:var(--blue-soft)}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.spinner{border-color:#dfe8f5;border-top-color:var(--blue)}}
+    .r24-same{margin:-9px 0 0}.field.r24-same label.match-check{display:flex;font-size:13px;font-weight:400;margin:0;padding-left:2px}
+    .workspace.mode-r24 .master-fields.more-below{-webkit-mask-image:linear-gradient(#000 calc(100% - 34px),transparent);mask-image:linear-gradient(#000 calc(100% - 34px),transparent)}
+    .workspace.mode-r24 .master-fields{max-height:268px;overflow-y:auto;overscroll-behavior:contain;margin:0 -8px 0 0;padding:9px 8px 4px 0;scrollbar-width:thin;scrollbar-color:#cfdcef transparent}
+    .workspace.mode-r24 .master-fields::-webkit-scrollbar{width:6px}.workspace.mode-r24 .master-fields::-webkit-scrollbar-thumb{background:#cfdcef;border-radius:6px}
+    .workspace.mode-r24 .master-fields .field:last-child{margin-bottom:4px}
+    @media(max-width:680px){.workspace.mode-r24 .master-fields{max-height:none;overflow:visible;margin:0;padding:0}}.master-control input:disabled{background:#f6f8fc;color:#7d8ba4}
+    .internal-tag{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:5px;background:#eef3fd;color:var(--blue);font-size:11px;font-weight:600;vertical-align:middle}
+    .history-kind{margin-top:12px;width:max-content}
+    @media(max-width:520px){.history-top{flex-wrap:wrap;gap:12px}}
   </style>
 </head>
 <body>
@@ -150,14 +159,15 @@
       <div class="brand"><span class="brand-mark"><i class="fi fi-rr-paper-plane" aria-hidden="true"></i></span><span>bulk <em>go.</em></span></div>
       <nav class="nav" aria-label="Menu utama">
         <button class="nav-eye" id="navEye" type="button" aria-label="Tampilkan tips Bulk Go" aria-controls="companionBubble" aria-expanded="false"><span class="nav-eye-pair" aria-hidden="true"><span class="nav-eye-white"><span class="nav-eye-pupil"></span></span><span class="nav-eye-white"><span class="nav-eye-pupil"></span></span></span><span class="nav-eye-mouth" aria-hidden="true"></span></button>
-        <button class="nav-btn active" data-view="workspace" type="button" aria-current="page">Buat CSV</button>
+        <button class="nav-btn active" data-view="workspace" data-mode="t24" type="button" aria-current="page">Bulk T24</button>
+        <button class="nav-btn" data-view="workspace" data-mode="r24" type="button">Bulk R24</button>
         <button class="nav-btn" data-view="history" type="button">Riwayat</button>
         <button class="icon-btn" id="helpBtn" type="button" aria-label="Panduan singkat" title="Panduan singkat"><i class="fi fi-rr-interrogation" aria-hidden="true"></i></button>
       </nav>
     </header>
     <main>
       <div class="intro animate-in">
-        <div><div class="eyebrow">BULK PAYMENT</div><h1>Excel to <span>CSV.</span></h1><p></p></div>
+        <div><div class="eyebrow" id="modeEyebrow">BULK PAYMENT · T24</div><h1>Excel to <span>CSV.</span></h1><p></p></div>
         <div class="date-chip"><i class="fi fi-rr-calendar" aria-hidden="true"></i><time id="todayLabel"></time></div>
       </div>
       <section id="workspaceView" class="workspace" aria-label="Siapkan bulkpayment">
@@ -185,8 +195,12 @@
             <h2 class="card-title"><span class="step-number">02</span> Master pembayaran</h2>
             <div class="master-fields">
               <div class="field"><div class="input-action master-control"><input id="batchName" type="text" maxlength="150" autocomplete="off" spellcheck="false" placeholder="607BPKAD…"><label class="master-float" for="batchName"><i class="fi fi-rr-document" aria-hidden="true"></i>Nama file</label><button id="generateNameBtn" type="button" title="Buat nama unik" aria-label="Buat nama file unik"><i class="fi fi-rr-magic-wand" aria-hidden="true"></i></button></div></div>
-              <div class="field"><div class="master-control"><input id="masterAccount" type="text" autocomplete="off" spellcheck="false" placeholder="Rekening sumber dana"><label class="master-float" for="masterAccount"><i class="fi fi-rr-bank" aria-hidden="true"></i>Rekening master</label></div></div>
-              <div class="field"><div class="master-control"><input id="processDate" type="text" readonly placeholder=" " aria-label="Tanggal proses otomatis dalam format YYYYMMDD"><label class="master-float" for="processDate"><i class="fi fi-rr-calendar" aria-hidden="true"></i>Tanggal proses</label></div></div>
+              <div class="field"><div class="master-control"><input id="masterAccount" type="text" autocomplete="off" spellcheck="false" placeholder="Rekening sumber dana"><label class="master-float" for="masterAccount"><i class="fi fi-rr-bank" aria-hidden="true"></i><span id="masterAccountLabel">Rekening master</span></label></div></div>
+              <div class="field r24-only" hidden><div class="master-control"><input id="r24CoCode" type="text" maxlength="12" autocomplete="off" spellcheck="false" placeholder="ID0010080"><label class="master-float" for="r24CoCode"><i class="fi fi-rr-building" aria-hidden="true"></i>Kode cabang (CO.CODE)</label></div></div>
+              <div class="field r24-only" hidden><div class="master-control"><input id="r24Ref" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="PBK DANA PUPR"><label class="master-float" for="r24Ref"><i class="fi fi-rr-comment" aria-hidden="true"></i>Keterangan (maks. 16)</label></div></div>
+              <div class="field r24-only" hidden><div class="master-control"><input id="r24Details" type="text" maxlength="35" autocomplete="off" spellcheck="false" placeholder="PBK DANA PUPR SEPTEMBER"><label class="master-float" for="r24Details"><i class="fi fi-rr-document" aria-hidden="true"></i>Payment details</label></div></div>
+              <div class="field r24-only r24-same" hidden><label class="match-check"><input id="r24SameDetails" type="checkbox" checked><span>Payment details sama dengan keterangan</span></label></div>
+              <div class="field"><div class="master-control"><input id="processDate" type="text" readonly placeholder=" " aria-label="Tanggal otomatis dalam format YYYYMMDD"><label class="master-float" for="processDate"><i class="fi fi-rr-calendar" aria-hidden="true"></i><span id="processDateLabel">Tanggal proses</span></label></div></div>
             </div>
             
           </section>
@@ -204,9 +218,9 @@
               </div>
               <div id="csvPanel" role="tabpanel" aria-labelledby="csvTab" hidden>
                 <div class="csv-toolbar"><span id="csvFilename" class="csv-filename"></span><div class="segmented" aria-label="Tampilan CSV"><button class="active" id="csvTableBtn" type="button" aria-pressed="true">Tabel</button><button id="csvTextBtn" type="button" aria-pressed="false">Teks CSV</button></div></div>
-                <div class="table-wrap main-table" id="csvTableWrap"><table class="csv-table"><thead><tr><th>A · Referensi</th><th>B · Rekening</th><th>C</th><th class="num">D · Nominal</th><th>E · Tanggal</th></tr></thead><tbody id="csvBody"></tbody></table></div>
+                <div class="table-wrap main-table" id="csvTableWrap"><table class="csv-table"><thead id="csvHead"></thead><tbody id="csvBody"></tbody></table></div>
                 <pre class="csv-text" id="csvText" tabindex="0" aria-label="Isi CSV dengan pemisah koma" hidden></pre>
-                <div class="pagination"><span id="csvRange"></span><div class="pagination-actions" id="csvPagination"><button id="csvPrev" type="button" aria-label="Halaman CSV sebelumnya"><i class="fi fi-rr-angle-small-left" aria-hidden="true"></i></button><span class="page-count" id="csvPage"></span><button id="csvNext" type="button" aria-label="Halaman CSV berikutnya"><i class="fi fi-rr-angle-small-right" aria-hidden="true"></i></button></div><span id="csvFormatNote" hidden>Koma · 5 kolom · tanpa BOM</span></div>
+                <div class="pagination"><span id="csvRange"></span><div class="pagination-actions" id="csvPagination"><button id="csvPrev" type="button" aria-label="Halaman CSV sebelumnya"><i class="fi fi-rr-angle-small-left" aria-hidden="true"></i></button><span class="page-count" id="csvPage"></span><button id="csvNext" type="button" aria-label="Halaman CSV berikutnya"><i class="fi fi-rr-angle-small-right" aria-hidden="true"></i></button></div><span id="csvFormatNote" hidden></span></div>
               </div>
             </div>
           </div>
@@ -214,7 +228,7 @@
         <div class="export-bar animate-in"><div class="export-status" id="exportStatus" aria-live="polite" hidden></div><div class="export-actions"><button class="btn btn-secondary" id="resetBtn" type="button">Reset</button><button class="btn btn-primary" id="downloadBtn" type="button" disabled><i class="fi fi-rr-download" aria-hidden="true"></i> Unduh CSV</button></div></div>
       </section>
       <section class="card history-card animate-in" id="historyView" aria-label="Riwayat unduhan" hidden>
-        <div class="history-top"><div><h2>Riwayat file</h2><p id="historyDescription"></p></div><button class="btn btn-secondary" id="exportHistoryBtn" type="button"><i class="fi fi-rr-download" aria-hidden="true"></i> Simpan riwayat</button></div>
+        <div class="history-top"><div><h2>Riwayat file</h2><p id="historyDescription"></p><div class="segmented history-kind" aria-label="Jenis riwayat"><button class="active" id="historyT24Btn" type="button" aria-pressed="true">Bulk T24</button><button id="historyR24Btn" type="button" aria-pressed="false">Bulk R24</button></div></div><button class="btn btn-secondary" id="exportHistoryBtn" type="button"><i class="fi fi-rr-download" aria-hidden="true"></i> Simpan riwayat</button></div>
         <div class="table-wrap"><table class="history-table"><thead><tr><th>Nama file</th><th>Diunduh (WIB)</th><th class="num">Penerima</th><th class="num">Total</th></tr></thead><tbody id="historyBody"></tbody></table></div>
         <div class="history-empty" id="historyEmpty">Belum ada CSV yang diunduh.</div>
         <div class="pagination history-pagination" id="historyPagination" hidden><span id="historyRange"></span><div class="pagination-actions"><button id="historyPrev" type="button" aria-label="Halaman riwayat sebelumnya"><i class="fi fi-rr-angle-small-left" aria-hidden="true"></i></button><span class="page-count" id="historyPage"></span><button id="historyNext" type="button" aria-label="Halaman riwayat berikutnya"><i class="fi fi-rr-angle-small-right" aria-hidden="true"></i></button></div></div>
@@ -257,8 +271,12 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_YzL1B8w7DCdR6-m7oT61eA_MStXLNGV';
     const PAGE_SIZE = 20;
     const HISTORY_PAGE_SIZE = 10;
-    const state = {reference:null,referenceSet:new Set(),referenceReady:false,workbook:null,file:null,mapping:null,rows:[],total:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1,historyPage:1,reading:false,exporting:false};
-    let memoryHistory = [];
+    const HISTORY_KEYS = {t24:HISTORY_KEY,r24:'bulkgo.history.r24.v1'};
+    const R24_COCODE_KEY = 'bulkgo.r24.cocode';
+    const INTERNAL_ACCOUNT = /^[A-Z]{2,5}\d{4,}$/;
+    const state = {mode:'t24',historyKind:'t24',reference:null,referenceSet:new Set(),referenceReady:false,workbook:null,file:null,mapping:null,rows:[],total:0n,totalCents:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1,historyPage:1,reading:false,exporting:false};
+    const isR24 = () => state.mode==='r24';
+    let memoryHistory = {t24:[],r24:[]};
     let storageAvailable = true;
     let historySyncing = false;
     let historyRequestId = 0;
@@ -278,6 +296,7 @@
         if(!state.rows.length)return {key:'welcome',message:'Halo! Mulai dengan file bendahara, ya.'};
         if(unmatchedCount())return {key:batch+':missing',message:'Ada rekening merah. Periksa di Data bendahara sebelum mengunduh, ya.'};
         if(validation().ready)return {key:batch+':ready',message:'CSV sudah siap. Periksa preview, lalu unduh.'};
+        if(isR24())return {key:batch+':r24',message:'Lengkapi rekening debit, kode cabang, dan keterangan R24, ya.'};
         return {key:batch+':review',message:'csv sukses diunduh, buka kembali file CSV yg sudah diunduh lalu ketik "ctrl + S" ya'};
       }
       function position() {
@@ -371,29 +390,35 @@
     function dateLabel(date = new Date()) {return new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'long',year:'numeric'}).format(date);}
     function money(value) {return 'Rp'+BigInt(value).toLocaleString('id-ID');}
     function plainMoney(value) {return BigInt(value).toLocaleString('id-ID');}
+    function centsParts(cents) {const c=BigInt(cents);return {whole:c/100n,frac:String(c%100n).padStart(2,'0')};}
+    function plainCents(cents) {const p=centsParts(cents);return p.whole.toLocaleString('id-ID')+(p.frac!=='00'?','+p.frac:'');}
+    function moneyCents(cents) {return 'Rp'+plainCents(cents);}
+    function r24Amount(cents) {const p=centsParts(cents);return p.whole.toString()+(p.frac!=='00'?'.'+p.frac:'');}
+    function r24Text(value) {return String(value??'').toUpperCase().replace(/\s+/g,' ').trim();}
     function cleanName(value) {return value.trim().replace(/\.csv$/i,'');}
     function canonicalName(value) {return cleanName(value).toUpperCase();}
     function normalizeHeader(value) {return String(value ?? '').toLowerCase().replace(/[\n\r_./()-]+/g,' ').replace(/\s+/g,' ').trim();}
 
-    function readHistory() {
+    function readHistory(kind='t24') {
       try {
-        const raw=localStorage.getItem(HISTORY_KEY);
-        if (!raw) return memoryHistory;
+        const raw=localStorage.getItem(HISTORY_KEYS[kind]);
+        if (!raw) return memoryHistory[kind];
         const parsed=JSON.parse(raw);
         if (!Array.isArray(parsed) || !parsed.every(x => x && typeof x.name==='string' && typeof x.total==='string' && /^\d+$/.test(x.total) && Number.isInteger(x.count) && x.count>=0 && typeof x.at==='string' && !Number.isNaN(Date.parse(x.at)))) throw new Error('Riwayat tidak valid.');
-        memoryHistory=parsed;
+        memoryHistory[kind]=parsed;
         return parsed;
-      } catch {storageAvailable=false; return memoryHistory;}
+      } catch {storageAvailable=false; return memoryHistory[kind];}
     }
-    function saveHistory(records) {
+    function saveHistory(records,kind='t24') {
       if (storageAvailable) {
-        try {localStorage.setItem(HISTORY_KEY,JSON.stringify(records));}
+        try {localStorage.setItem(HISTORY_KEYS[kind],JSON.stringify(records));}
         catch {storageAvailable=false;}
       }
-      memoryHistory=records;
+      memoryHistory[kind]=records;
       refreshStorageLabel();
     }
     function refreshStorageLabel() {
+      if(state.historyKind==='r24'){$('historyHint').textContent=storageAvailable?'Riwayat Bulk R24 hanya tersimpan di browser ini dan tidak dikirim ke database.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';return;}
       const pending=readHistory().filter(x=>x.eventId&&!x.syncedAt).length;
       $('historyHint').textContent=historyConnectionError?'Riwayat bersama belum bisa dimuat. Untuk sementara ditampilkan riwayat browser ini.':databaseReady&&pending?`${pending} unduhan di browser ini belum terkirim ke database. Riwayat lokal ditampilkan sampai sinkronisasi berhasil.`:databaseReady?'':storageAvailable?'Riwayat ini hanya tersimpan di browser ini.':'Penyimpanan browser tidak tersedia. Simpan riwayat sebelum menutup halaman.';
     }
@@ -415,10 +440,10 @@
       } finally {historySyncing=false;if(!$('historyView').hidden)void renderHistory();else refreshStorageLabel();}
       if(failed)notify('Riwayat tersimpan di browser, tetapi belum masuk database. Coba lagi saat koneksi tersedia.','info');
     }
-    function isUsed(name) {return readHistory().some(x=>canonicalName(x.name)===canonicalName(name));}
+    function isUsed(name,kind=state.mode) {return readHistory(kind).some(x=>canonicalName(x.name)===canonicalName(name));}
     function suggestName() {
       const p=wibParts();
-      const base='607BP'+p.day+p.month+p.year.slice(-2)+p.hour+p.minute+p.second;
+      const base=(isR24()?'R24BP':'607BP')+p.day+p.month+p.year.slice(-2)+p.hour+p.minute+p.second;
       let value=base, n=1;
       while (isUsed(value)) value=base+'_'+String(n++).padStart(2,'0');
       $('batchName').value=value;
@@ -439,7 +464,7 @@
       if (range.e.r>=100000 || range.e.c>=256) throw new Error('Sheet terlalu besar. Gunakan salinan berisi tabel pembayaran saja (maks. 100.000 baris dan 256 kolom).');
       return range;
     }
-    function accountOf(cell) {
+    function accountOf(cell,allowInternal=false) {
       if (!cell || cell.v===undefined || cell.v===null || String(cell.v).trim()==='') return {error:'Rekening kosong'};
       if (cell.t==='e') return {error:'Rekening berisi error Excel'};
       if (cell.t==='d' || cell.t==='b' || typeof cell.v==='boolean') return {error:'Format rekening tidak valid; gunakan teks berisi nomor rekening'};
@@ -451,7 +476,8 @@
         return {value,cleaned:false,original:value};
       }
       const original=String(cell.v);
-      const value=original.replace(/[\s\u00a0\u200B-\u200D\u2060\uFEFF'"‘’“”#＃\-‐‑‒–—]/g,'');
+      const value=original.replace(/[\s\u00a0\u200B-\u200D\u2060\uFEFF'"‘’“”#＃\-‐‑‒–—]/g,'').toUpperCase();
+      if (allowInternal && INTERNAL_ACCOUNT.test(value)) return {value,cleaned:value!==original,original,internal:true};
       if (!/^\d+$/.test(value)) return {error:'Rekening mengandung huruf atau simbol yang meragukan. Periksa sumber; hanya digit 0–9 yang dapat diekspor.'};
       if (/^0+$/.test(value)) return {error:'Rekening tidak boleh hanya berisi nol'};
       return {value,cleaned:value!==original,original};
@@ -460,7 +486,7 @@
       const [whole,fraction]=String(value).split('.');
       return 'Rp'+BigInt(whole).toLocaleString('id-ID')+(fraction?','+fraction:'');
     }
-    function amountOf(cell,round=false) {
+    function amountOf(cell,round=false,allowCents=false) {
       if (!cell || cell.v===undefined || cell.v===null || String(cell.v).trim()==='') return {error:cell?.f?'Rumus nominal belum memiliki hasil':'Nominal kosong'};
       if (cell.t==='e') return {error:'Nominal berisi error Excel'};
       let text;
@@ -469,6 +495,7 @@
         if (cell.v<=0) return {error:'Nominal harus lebih dari nol'};
         text=String(cell.v);
         if (/e/i.test(text)) return {error:'Nominal terlalu kecil untuk rupiah bulat'};
+        if (text.includes('.')&&Math.abs(cell.v*100-Math.round(cell.v*100))<1e-6) text=cell.v.toFixed(2);
       } else {
         text=String(cell.v).trim().replace(/^(?:Rp\.?|IDR)\s*/i,'').replace(/[\s\u00a0]/g,'');
         if (/^\(.*\)$/.test(text)) text='-'+text.slice(1,-1);
@@ -489,10 +516,15 @@
       if(!/^-?\d+(?:\.\d+)?$/.test(text)) return {error:'Nominal tidak valid'};
       const [whole,fraction='']=text.split('.'),hasFraction=/[1-9]/.test(fraction);
       if(text.startsWith('-') || (BigInt(whole)===0n&&!hasFraction)) return {error:'Nominal harus lebih dari nol'};
-      if(hasFraction&&!round) return {error:'Nominal memiliki pecahan. Aktifkan Bulatkan ke rupiah terdekat dan periksa preview.'};
+      if(hasFraction&&!round) {
+        if(!allowCents) return {error:'Nominal memiliki pecahan. Aktifkan Bulatkan ke rupiah terdekat dan periksa preview.'};
+        const digits=fraction.replace(/0+$/,'');
+        if(digits.length>2) return {error:'Nominal lebih dari 2 angka desimal. Perbaiki sumber atau aktifkan Bulatkan ke rupiah terdekat.'};
+        return {value:BigInt(whole),cents:BigInt(whole)*100n+BigInt(digits.padEnd(2,'0')),rounded:false,original:text};
+      }
       const value=BigInt(whole)+(hasFraction&&fraction[0]>='5'?1n:0n);
       if(value<=0n) return {error:'Hasil pembulatan Rp0. Periksa nominal sumber.'};
-      return {value,rounded:hasFraction,original:text};
+      return {value,cents:value*100n,rounded:hasFraction,original:text};
     }
 
     function headerScore(value,type) {
@@ -546,7 +578,7 @@
     }
     function extractRows(workbook,mapping) {
       const sheet=workbook.Sheets[mapping.sheet],bounds=sheetBounds(sheet);
-      const result={rows:[],errors:[],ignored:[],duplicates:[],total:0n,sourceTotal:null,totalMismatch:false,excluded:0,rounded:[]};
+      const result={rows:[],errors:[],ignored:[],duplicates:[],total:0n,totalCents:0n,sourceTotal:null,totalMismatch:false,excluded:0,rounded:[]};
       if (mapping.account<0 || mapping.amount<0) return result;
       if (mapping.account===mapping.amount) {result.errors.push({row:mapping.header+1,message:'Kolom rekening dan nominal harus berbeda'}); return result;}
       const start=mapping.startRow??mapping.header+2,end=mapping.endRow??bounds.e.r+1;
@@ -567,7 +599,7 @@
         const isTotal=labels.some(s=>/^(?:grand\s+total|total(?:\s+(?:keseluruhan|transfer|pembayaran|bersih))?|jumlah(?:\s+(?:keseluruhan|transfer|pembayaran|bersih))?|sub\s*total)\s*[\s.:…-]*$/i.test(s));
         if (isTotal && !/^\d+$/.test(av)) {
           if(inRange)result.ignored.push(r+1);
-          const amount=amountOf(amountCell,mapping.roundAmounts===true);
+          const amount=amountOf(amountCell,mapping.roundAmounts===true,mapping.r24===true);
           if (!amount.error && (inRange||r+1===end+1)) sourceTotals.push(amount);
           continue;
         }
@@ -581,26 +613,26 @@
         const footerLabel=/^(?:NIP[\s.:]|(?:mengetahui|menyetujui|bendahara|pengguna anggaran|kuasa pengguna|kepala dinas|pemimpin|ttd|tanggal|catatan|keterangan)\b)/i.test(mv);
         if(!av&&!hasRowNumber&&(footerLabel||(!nameValue&&(textNote||dateNote)))){if(inRange)result.ignored.push(r+1);continue;}
         if(!inRange){result.excluded++;continue;}
-        const account=accountOf(accountCell), amount=amountOf(amountCell,mapping.roundAmounts===true);
+        const account=accountOf(accountCell,mapping.r24===true), amount=amountOf(amountCell,mapping.roundAmounts===true,mapping.r24===true);
         if (account.error || amount.error) {
           result.errors.push({row:r+1,message:[account.error,amount.error].filter(Boolean).join(' · ')});
           continue;
         }
-        const record={accountCleaned:account.cleaned,originalAccount:account.original,rounded:amount.rounded,originalAmount:amount.original,index:result.rows.length+1,sourceRow:r+1,account:account.value,amount:amount.value,name:mapping.name>=0?displayCell(cellAt(sheet,r,mapping.name)).trim():''};
-        result.rows.push(record);result.total+=record.amount;
+        const record={internal:!!account.internal,cents:amount.cents,accountCleaned:account.cleaned,originalAccount:account.original,rounded:amount.rounded,originalAmount:amount.original,index:result.rows.length+1,sourceRow:r+1,account:account.value,amount:amount.value,name:mapping.name>=0?displayCell(cellAt(sheet,r,mapping.name)).trim():''};
+        result.rows.push(record);result.total+=record.amount;result.totalCents+=record.cents;
         if(amount.rounded)result.rounded.push(record);
         seen.set(record.account,(seen.get(record.account)||0)+1);
       }
       result.duplicates=[...seen].filter(([,count])=>count>1).map(([account,count])=>({account,count}));
-      if (sourceTotals.length===1) {result.sourceTotal=sourceTotals[0].value;result.sourceTotalOriginal=sourceTotals[0].rounded?sourceTotals[0].original:null;}
-      result.totalMismatch=result.sourceTotal!==null&&result.sourceTotal!==result.total;
+      if (sourceTotals.length===1) {result.sourceTotal=sourceTotals[0].cents;result.sourceTotalOriginal=sourceTotals[0].rounded?sourceTotals[0].original:null;}
+      result.totalMismatch=result.sourceTotal!==null&&result.sourceTotal!==result.totalCents;
       return result;
     }
 
     async function openMapping(workbook,file,initial) {
-      let mapping={...(initial||guessMapping(workbook))},rawPage=1,rawPages=1,roundPage=1,parsed=null,rangeEdited=!!initial;
+      let mapping={...(initial||guessMapping(workbook)),r24:isR24()},rawPage=1,rawPages=1,roundPage=1,parsed=null,rangeEdited=!!initial;
       if(mapping.startRow===undefined||mapping.endRow===undefined)mapping={...mapping,...guessDataRange(workbook,mapping)};
-      const html=`<p class="match-caption">${esc(file.name)}</p><div class="match-grid"><div class="field"><label for="mapSheet">Sheet</label><select id="mapSheet">${workbook.SheetNames.map(n=>`<option value="${esc(n)}" ${n===mapping.sheet?'selected':''}>${esc(n)}</option>`).join('')}</select></div><div class="field"><label for="mapHeader">Baris judul</label><input id="mapHeader" type="number" min="1" step="1" value="${mapping.header+1}"></div><div class="field"><label for="mapAccount">Kolom rekening</label><select id="mapAccount"></select></div><div class="field"><label for="mapAmount">Kolom nominal</label><select id="mapAmount"></select></div></div><div class="match-details"><div class="field"><label for="mapName">Nama penerima (opsional)</label><select id="mapName"></select></div><div class="field"><label for="mapStart">Mulai dari baris</label><input id="mapStart" type="number" min="1" step="1" value="${mapping.startRow}"></div><div class="field"><label for="mapEnd">Sampai baris</label><input id="mapEnd" type="number" min="1" step="1" value="${mapping.endRow}"></div></div><div class="match-table-box"><table class="match-table"><thead id="rawHead"></thead><tbody id="rawBody"></tbody></table></div><div class="raw-pagination"><span id="rawRange"></span><button id="rawPrev" type="button">Sebelumnya</button><button id="rawNext" type="button">Berikutnya</button><button id="rawLast" type="button">Terakhir</button></div><div class="round-option"><label class="match-check"><input id="roundAmounts" type="checkbox" ${mapping.roundAmounts?'checked':''}><span><strong>Bulatkan ke rupiah terdekat</strong><small>Pecahan &lt; 0,5 turun · ≥ 0,5 naik.</small></span></label></div><section id="roundPreview" class="round-preview" hidden aria-label="Preview pembulatan"><p id="roundCaption" aria-live="polite"></p><div class="match-table-box"><table class="match-table"><thead><tr><th>Baris</th><th>Rekening</th><th class="num">Sebelum</th><th class="num">Sesudah</th></tr></thead><tbody id="roundBody"></tbody></table></div><div class="raw-pagination"><span id="roundRange"></span><button id="roundPrev" type="button">Sebelumnya</button><button id="roundNext" type="button">Berikutnya</button></div></section><div id="matchSummary" class="match-summary"></div><div id="matchErrors" class="match-errors" hidden></div><div id="matchWarning" class="match-warning" hidden></div><label class="match-check"><input id="matchCheck" type="checkbox"><span>Rentang baris, rekening, nominal, dan jumlah penerima sudah sesuai.<span id="roundConsent" hidden> Saya menyetujui hasil pembulatan di atas.</span></span></label>`;
+      const html=`<p class="match-caption">${esc(file.name)}</p><div class="match-grid"><div class="field"><label for="mapSheet">Sheet</label><select id="mapSheet">${workbook.SheetNames.map(n=>`<option value="${esc(n)}" ${n===mapping.sheet?'selected':''}>${esc(n)}</option>`).join('')}</select></div><div class="field"><label for="mapHeader">Baris judul</label><input id="mapHeader" type="number" min="1" step="1" value="${mapping.header+1}"></div><div class="field"><label for="mapAccount">Kolom rekening</label><select id="mapAccount"></select></div><div class="field"><label for="mapAmount">Kolom nominal</label><select id="mapAmount"></select></div></div><div class="match-details"><div class="field"><label for="mapName">Nama penerima (opsional)</label><select id="mapName"></select></div><div class="field"><label for="mapStart">Mulai dari baris</label><input id="mapStart" type="number" min="1" step="1" value="${mapping.startRow}"></div><div class="field"><label for="mapEnd">Sampai baris</label><input id="mapEnd" type="number" min="1" step="1" value="${mapping.endRow}"></div></div><div class="match-table-box"><table class="match-table"><thead id="rawHead"></thead><tbody id="rawBody"></tbody></table></div><div class="raw-pagination"><span id="rawRange"></span><button id="rawPrev" type="button">Sebelumnya</button><button id="rawNext" type="button">Berikutnya</button><button id="rawLast" type="button">Terakhir</button></div><div class="round-option"><label class="match-check"><input id="roundAmounts" type="checkbox" ${mapping.roundAmounts?'checked':''}><span><strong>Bulatkan ke rupiah terdekat</strong><small>Pecahan &lt; 0,5 turun · ≥ 0,5 naik.${isR24()?' Opsional untuk R24: nominal dengan maks. 2 desimal tetap diterima.':''}</small></span></label></div><section id="roundPreview" class="round-preview" hidden aria-label="Preview pembulatan"><p id="roundCaption" aria-live="polite"></p><div class="match-table-box"><table class="match-table"><thead><tr><th>Baris</th><th>Rekening</th><th class="num">Sebelum</th><th class="num">Sesudah</th></tr></thead><tbody id="roundBody"></tbody></table></div><div class="raw-pagination"><span id="roundRange"></span><button id="roundPrev" type="button">Sebelumnya</button><button id="roundNext" type="button">Berikutnya</button></div></section><div id="matchSummary" class="match-summary"></div><div id="matchErrors" class="match-errors" hidden></div><div id="matchWarning" class="match-warning" hidden></div><label class="match-check"><input id="matchCheck" type="checkbox"><span>Rentang baris, rekening, nominal, dan jumlah penerima sudah sesuai.<span id="roundConsent" hidden> Saya menyetujui hasil pembulatan di atas.</span></span></label>`;
       function fillColumns() {
         const sheet=workbook.Sheets[mapping.sheet],bounds=sheetBounds(sheet);
         const options=[];
@@ -624,7 +656,7 @@
       function rawCellContent(sheet,row,col) {
         const cell=cellAt(sheet,row,col),original=displayCell(cell);
         if(col!==mapping.account)return esc(original);
-        const account=accountOf(cell);
+        const account=accountOf(cell,mapping.r24===true);
         return account.error||!account.cleaned?esc(original):`<span class="account-clean-preview"><span class="account-before">${esc(original)}</span><strong>→ ${esc(account.value)}</strong></span>`;
       }
       function renderRaw() {
@@ -663,16 +695,17 @@
           renderRounding();
           const missing=mapping.account<0||mapping.amount<0;
           const errors=parsed.errors;
-          $('matchSummary').innerHTML=`<span>Baris <b>${esc(mapping.startRow)}–${esc(mapping.endRow)}</b> · <b>${parsed.rows.length}</b> penerima${parsed.ignored.length?' · '+parsed.ignored.length+' baris nontransaksi':''}</span><b>${money(parsed.total)}</b>`;
+          $('matchSummary').innerHTML=`<span>Baris <b>${esc(mapping.startRow)}–${esc(mapping.endRow)}</b> · <b>${parsed.rows.length}</b> penerima${parsed.ignored.length?' · '+parsed.ignored.length+' baris nontransaksi':''}</span><b>${moneyCents(parsed.totalCents)}</b>`;
           $('matchErrors').hidden=!missing&&!errors.length;
           $('matchErrors').innerHTML=missing?'Pilih kolom rekening dan nominal.':errors.slice(0,5).map(e=>`${e.row?'Baris '+e.row+': ':''}${esc(e.message)}`).join('<br>')+(errors.length>5?'<br>Dan '+(errors.length-5)+' baris lain.':'');
           const warnings=[];
           if(parsed.rows.some(r=>r.accountCleaned))warnings.push(parsed.rows.filter(r=>r.accountCleaned).length+' rekening dibersihkan. Periksa nomor akhir di preview.');
-          if(parsed.sourceTotalOriginal)warnings.push('Total sumber juga dibulatkan: '+originalMoney(parsed.sourceTotalOriginal)+' → '+money(parsed.sourceTotal)+'.');
+          if(parsed.sourceTotalOriginal)warnings.push('Total sumber juga dibulatkan: '+originalMoney(parsed.sourceTotalOriginal)+' → '+moneyCents(parsed.sourceTotal)+'.');
           if(parsed.duplicates.length) warnings.push(parsed.duplicates.length+' rekening muncul berulang. Setiap baris tetap menjadi transaksi terpisah.');
           if(parsed.excluded)warnings.push(parsed.excluded+' baris data di luar rentang tidak akan diekspor.');
-          if(parsed.totalMismatch)warnings.push('Total rentang '+money(parsed.total)+' berbeda dari total sumber '+money(parsed.sourceTotal)+'. Pastikan rentang yang dipilih sudah sesuai.');
-          if(parsed.sourceTotal!==null&&parsed.sourceTotal===parsed.total&&!errors.length) warnings.push('Total sumber sesuai: '+money(parsed.sourceTotal)+'.');
+          if(parsed.totalMismatch)warnings.push('Total rentang '+moneyCents(parsed.totalCents)+' berbeda dari total sumber '+moneyCents(parsed.sourceTotal)+'. Pastikan rentang yang dipilih sudah sesuai.');
+          if(parsed.sourceTotal!==null&&parsed.sourceTotal===parsed.totalCents&&!errors.length) warnings.push('Total sumber sesuai: '+moneyCents(parsed.sourceTotal)+'.');
+          if(parsed.rows.some(r=>r.internal))warnings.push(parsed.rows.filter(r=>r.internal).length+' rekening internal (mis. IDR…) dikenali.');
           $('matchWarning').hidden=!warnings.length;
           $('matchWarning').textContent=warnings.join(' ');
           $('matchCheck').disabled=missing||!!errors.length||!parsed.rows.length;
@@ -712,7 +745,7 @@
           return true;
         }});
       if(!answer.isConfirmed) return false;
-      Object.assign(state,{workbook,file,mapping:{...mapping},rows:parsed.rows,total:parsed.total,duplicates:parsed.duplicates,sourceTotal:parsed.sourceTotal,dataPage:1,csvPage:1,tab:'data'});
+      Object.assign(state,{workbook,file,mapping:{...mapping},rows:parsed.rows,total:parsed.total,totalCents:parsed.totalCents,duplicates:parsed.duplicates,sourceTotal:parsed.sourceTotal,dataPage:1,csvPage:1,tab:'data'});
       $('searchInput').value='';
       refresh();
       notify(parsed.rows.length+' penerima sudah dicocokkan.','success');
@@ -752,7 +785,7 @@
       return {branch:reference.branch,accounts:[...new Set(accounts)],updatedAt:reference.updatedAt||new Date().toISOString()};
     }
     function unmatchedCount() {
-      return state.reference?state.rows.filter(row=>!state.referenceSet.has(row.account)).length:0;
+      return state.reference?state.rows.filter(row=>!row.internal&&!state.referenceSet.has(row.account)).length:0;
     }
     function renderReferenceStatus() {
       const ref=state.reference;
@@ -877,14 +910,14 @@
       if(state.reading||state.exporting)return;
       const row=state.rows.find(item=>item.sourceRow===sourceRow);
       if(!row)return;
-      const html=`<p class="match-caption">Baris Excel ${row.sourceRow} · ${esc(row.name||'Penerima '+row.index)}</p><div class="field"><label for="editedAccount">Nomor rekening</label><input id="editedAccount" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="${esc(row.account)}"></div><p class="help-note">Nominal tetap ${money(row.amount)}. Rekening yang belum ada di acuan akan tetap merah.</p>`;
+      const html=`<p class="match-caption">Baris Excel ${row.sourceRow} · ${esc(row.name||'Penerima '+row.index)}</p><div class="field"><label for="editedAccount">Nomor rekening</label><input id="editedAccount" type="text" inputmode="${isR24()?'text':'numeric'}" autocomplete="off" spellcheck="false" value="${esc(row.account)}"></div><p class="help-note">Nominal tetap ${moneyCents(row.cents)}. Rekening yang belum ada di acuan akan tetap merah.${isR24()?' Rekening internal seperti IDR1281900160001 boleh dipakai di Bulk R24.':''}</p>`;
       const answer=await dialog({title:'Edit rekening bendahara',html,width:460,showCancelButton:true,confirmButtonText:'Simpan rekening',cancelButtonText:'Batal',didOpen:()=>{$('editedAccount').focus();$('editedAccount').select();},preConfirm:()=>{
-        const parsed=accountOf({v:$('editedAccount').value,t:'s'});
+        const parsed=accountOf({v:$('editedAccount').value,t:'s'},isR24());
         if(parsed.error){Swal.showValidationMessage(parsed.error);return false;}
-        return parsed.value;
+        return parsed;
       }});
-      if(!answer.isConfirmed||answer.value===row.account)return;
-      state.rows=state.rows.map(item=>item.sourceRow===sourceRow?{...item,account:answer.value,accountEdited:true}:item);
+      if(!answer.isConfirmed||answer.value.value===row.account)return;
+      state.rows=state.rows.map(item=>item.sourceRow===sourceRow?{...item,account:answer.value.value,internal:!!answer.value.internal,accountEdited:true}:item);
       const counts=new Map();for(const item of state.rows)counts.set(item.account,(counts.get(item.account)||0)+1);
       state.duplicates=[...counts].filter(([,count])=>count>1).map(([account,count])=>({account,count}));
       refresh();notify('Rekening baris '+sourceRow+' diperbarui.','success');
@@ -915,7 +948,10 @@
     }
 
     function masterValues() {
-      return {name:cleanName($('batchName').value),account:$('masterAccount').value.trim().replace(/^'/,'').replace(/\s/g,'').toUpperCase(),date:dateCode()};
+      const base={name:cleanName($('batchName').value),account:$('masterAccount').value.trim().replace(/^'/,'').replace(/\s/g,'').toUpperCase(),date:dateCode()};
+      if(!isR24())return base;
+      const ref=r24Text($('r24Ref').value);
+      return {...base,coCode:$('r24CoCode').value.trim().replace(/\s/g,'').toUpperCase(),ref,details:$('r24SameDetails').checked?ref:r24Text($('r24Details').value)};
     }
     function validation() {
       if(!state.rows.length) return {message:''};
@@ -925,8 +961,18 @@
       if(m.name.length>150) return {message:'Nama file maksimal 150 karakter.',error:true};
       if(!/^[A-Za-z0-9_-]+$/.test(m.name)) return {message:'Nama file hanya boleh berisi huruf, angka, - atau _.',error:true};
       if(isUsed(m.name)) return {message:'Nama ini sudah digunakan. Buat nama baru.',error:true};
-      if(!m.account) return {message:'Lengkapi rekening master.'};
-      if(!/^[A-Z0-9]+$/.test(m.account)) return {message:'Periksa rekening master; gunakan huruf atau digit.',error:true};
+      if(!m.account) return {message:isR24()?'Lengkapi rekening debit.':'Lengkapi rekening master.'};
+      if(!/^[A-Z0-9]+$/.test(m.account)) return {message:isR24()?'Periksa rekening debit; gunakan huruf atau digit.':'Periksa rekening master; gunakan huruf atau digit.',error:true};
+      if(isR24()){
+        if(!m.coCode) return {message:'Isi kode cabang (CO.CODE), misalnya ID0010080.'};
+        if(!/^[A-Z]{2}\d{7}$/.test(m.coCode)) return {message:'Kode cabang tidak sesuai. Contoh format: ID0010080.',error:true};
+        if(!m.ref) return {message:'Isi keterangan (Debit/Credit Their Ref).'};
+        if(m.ref.length>16) return {message:'Keterangan maksimal 16 karakter.',error:true};
+        if(!/^[A-Z0-9 ]+$/.test(m.ref)) return {message:'Keterangan hanya boleh huruf, angka, dan spasi. Tanpa koma, titik, atau tanda lain.',error:true};
+        if(!m.details) return {message:'Isi payment details, atau centang samakan dengan keterangan.'};
+        if(m.details.length>35) return {message:'Payment details maksimal 35 karakter.',error:true};
+        if(!/^[A-Z0-9 ]+$/.test(m.details)) return {message:'Payment details hanya boleh huruf, angka, dan spasi. Tanpa koma, titik, atau tanda lain.',error:true};
+      }
       return {ready:true,message:'Siap diunduh · '+state.rows.length+' penerima'};
     }
     function csvRows(master = masterValues(),rows=state.rows,total=state.total) {
@@ -934,10 +980,24 @@
     }
     function csvString(master = masterValues(),rows=state.rows,total=state.total) {
       if(!/^[A-Za-z0-9_-]+$/.test(master.name)||!/^[A-Z0-9]+$/.test(master.account)||!/^\d{8}$/.test(master.date))throw new Error('Periksa nama file, rekening master, dan tanggal CSV.');
-      if(!rows.length||rows.some(r=>!/^[0-9]+$/.test(r.account)||/^0+$/.test(r.account)||typeof r.amount!=='bigint'||r.amount<=0n)||total!==rows.reduce((n,r)=>n+r.amount,0n))throw new Error('CSV diblokir: rekening atau total tidak valid.');
+      if(!rows.length||rows.some(r=>!/^[0-9]+$/.test(r.account)||/^0+$/.test(r.account)||typeof r.amount!=='bigint'||r.amount<=0n||r.cents%100n!==0n)||total!==rows.reduce((n,r)=>n+r.amount,0n))throw new Error('CSV diblokir: rekening atau total tidak valid.');
       const all=csvRows(master,rows,total);
       if(all.some(r=>r.length!==5||r.some(v=>/[\r\n,;:]/.test(v)))) throw new Error('Ada karakter yang tidak sesuai pada CSV.');
       return all.map(r=>r.join(',')).join('\r\n')+'\r\n';
+    }
+    // Bulk R24 (Upload FT Batch): 15 kolom dipisah "|", tanpa judul dan tanpa baris master.
+    // A ID · B trn.type · C DEBIT.ACCT.NO · D DEBIT.CURRENCY · E DEBIT.AMOUNT · F CREDIT.ACCT.NO · G CREDIT.CURRENCY · H ORDERING.BANK
+    // I CO.CODE · J DEBIT.VALUE.DATE · K CREDIT.VALUE.DATE · L DEBIT.THEIR.REF · M CREDIT.THEIR.REF · N PAYMENT.DETAILS · O PROFIT.CENTRE.DEPT
+    function r24Rows(master = masterValues(),rows=state.rows) {
+      return rows.map(r=>['','AC',master.account,'IDR',r24Amount(r.cents),r.account,'IDR','',master.coCode,master.date,master.date,master.ref,master.ref,master.details,'']);
+    }
+    function r24String(master = masterValues(),rows=state.rows) {
+      if(!/^[A-Za-z0-9_-]+$/.test(master.name)||!/^[A-Z0-9]+$/.test(master.account)||!/^\d{8}$/.test(master.date)||!/^[A-Z]{2}\d{7}$/.test(master.coCode||''))throw new Error('Periksa nama file, rekening debit, kode cabang, dan tanggal.');
+      if(!/^[A-Z0-9 ]{1,16}$/.test(master.ref||'')||!/^[A-Z0-9 ]{1,35}$/.test(master.details||''))throw new Error('Periksa keterangan dan payment details.');
+      if(!rows.length||rows.some(r=>typeof r.cents!=='bigint'||r.cents<=0n||!(/^[0-9]+$/.test(r.account)&&!/^0+$/.test(r.account)||INTERNAL_ACCOUNT.test(r.account))))throw new Error('File R24 diblokir: rekening atau nominal tidak valid.');
+      const all=r24Rows(master,rows);
+      if(all.some(r=>r.length!==15||r.some(v=>/[\r\n|,;"]/.test(v))))throw new Error('Ada karakter yang tidak sesuai pada file R24.');
+      return all.map(r=>r.join('|')).join('\r\n')+'\r\n';
     }
 
     function refreshDates() {
@@ -948,35 +1008,76 @@
     }
     function renderData() {
       const search=$('searchInput').value.trim().toLowerCase();
-      const rows=state.rows.filter(row=>!search||row.name.toLowerCase().includes(search)||row.account.includes(search));
+      const rows=state.rows.filter(row=>!search||row.name.toLowerCase().includes(search)||row.account.toLowerCase().includes(search));
       const pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));state.dataPage=Math.min(state.dataPage,pages);
       const start=(state.dataPage-1)*PAGE_SIZE,shown=rows.slice(start,start+PAGE_SIZE),duplicates=new Set(state.duplicates.map(item=>item.account));
       $('dataBody').innerHTML=shown.map(row=>{
-        const missing=state.reference&&!state.referenceSet.has(row.account);
-        return `<tr title="${esc(state.mapping.sheet)} · baris ${row.sourceRow}"><td class="row-number">${row.index}</td><td class="recipient-name" title="${esc(row.name)}">${esc(row.name||'—')}</td><td class="account"><button type="button" class="account-edit${missing?' missing':''}" data-edit-row="${row.sourceRow}" title="${missing?'Rekening tidak ada di acuan. Klik untuk edit.':'Klik untuk edit rekening'}" aria-label="Edit rekening baris ${row.sourceRow}: ${esc(row.account)}">${esc(row.account)}<span aria-hidden="true">✎</span></button>${duplicates.has(row.account)?'<span class="duplicate" title="Rekening berulang"></span>':''}</td><td class="num">${plainMoney(row.amount)}</td></tr>`;
+        const missing=state.reference&&!row.internal&&!state.referenceSet.has(row.account);
+        return `<tr title="${esc(state.mapping.sheet)} · baris ${row.sourceRow}"><td class="row-number">${row.index}</td><td class="recipient-name" title="${esc(row.name)}">${esc(row.name||'—')}</td><td class="account"><button type="button" class="account-edit${missing?' missing':''}" data-edit-row="${row.sourceRow}" title="${missing?'Rekening tidak ada di acuan. Klik untuk edit.':'Klik untuk edit rekening'}" aria-label="Edit rekening baris ${row.sourceRow}: ${esc(row.account)}">${esc(row.account)}<span aria-hidden="true">✎</span></button>${row.internal?'<span class="internal-tag" title="Rekening internal">internal</span>':''}${duplicates.has(row.account)?'<span class="duplicate" title="Rekening berulang"></span>':''}</td><td class="num">${plainCents(row.cents)}</td></tr>`;
       }).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:40px">Penerima tidak ditemukan.</td></tr>';
       $('dataRange').textContent=rows.length?(start+1)+'–'+(start+shown.length)+' dari '+rows.length:'0 penerima';
       $('dataPage').textContent=state.dataPage+' / '+pages;$('dataPrev').disabled=state.dataPage<=1;$('dataNext').disabled=state.dataPage>=pages;
-      $('dataNote').textContent='Baris '+state.mapping.startRow+'–'+state.mapping.endRow+(unmatchedCount()?' · '+unmatchedCount()+' rekening merah':'')+(state.rows.some(row=>row.accountCleaned)?' · '+state.rows.filter(row=>row.accountCleaned).length+' dibersihkan':'')+(state.rows.some(row=>row.rounded)?' · '+state.rows.filter(row=>row.rounded).length+' dibulatkan':'')+(state.duplicates.length?' · '+state.duplicates.length+' berulang':'');
+      $('dataNote').textContent='Baris '+state.mapping.startRow+'–'+state.mapping.endRow+(unmatchedCount()?' · '+unmatchedCount()+' rekening merah':'')+(state.rows.some(row=>row.accountCleaned)?' · '+state.rows.filter(row=>row.accountCleaned).length+' dibersihkan':'')+(state.rows.some(row=>row.rounded)?' · '+state.rows.filter(row=>row.rounded).length+' dibulatkan':'')+(state.duplicates.length?' · '+state.duplicates.length+' berulang':'')+(state.rows.some(row=>row.internal)?' · '+state.rows.filter(row=>row.internal).length+' internal':'');
     }
     function renderCsv() {
       if(!state.rows.length) return;
-      const m=masterValues(),rows=csvRows(m),pages=Math.ceil(rows.length/PAGE_SIZE);state.csvPage=Math.min(state.csvPage,pages);
+      const r24=isR24(),m=masterValues(),rows=r24?r24Rows(m):csvRows(m),pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));state.csvPage=Math.min(state.csvPage,pages);
       const start=(state.csvPage-1)*PAGE_SIZE,shown=rows.slice(start,start+PAGE_SIZE);
       $('csvFilename').textContent=(m.name||'Nama file belum diisi')+(m.name?'.csv':'');
-      $('csvBody').innerHTML=shown.map((r,i)=>`<tr class="${start+i===0?'master-row':''}"><td class="ref">${esc(r[0]||'—')}</td><td class="account">${esc(r[1]||'—')}</td><td>IDR</td><td class="num">${esc(r[3])}</td><td>${r[4]}</td></tr>`).join('');
-      try {$('csvText').textContent=csvString(m);}catch{$('csvText').textContent='Perbaiki nama file dan rekening master untuk melihat teks CSV.';}
+      if(r24){
+        $('csvHead').innerHTML='<tr><th>No.</th><th>C · Rek. debit</th><th class="num">E · Nominal</th><th>F · Rek. kredit</th><th>I · CO.CODE</th><th>J/K · Tanggal</th><th>L/M · Their ref</th><th>N · Payment details</th></tr>';
+        $('csvBody').innerHTML=shown.map((r,i)=>`<tr><td class="row-number">${start+i+1}</td><td class="account">${esc(r[2]||'—')}</td><td class="num">${esc(r[4])}</td><td class="account">${esc(r[5])}</td><td>${esc(r[8]||'—')}</td><td>${esc(r[9])}</td><td>${esc(r[11]||'—')}</td><td>${esc(r[13]||'—')}</td></tr>`).join('');
+        try {$('csvText').textContent=r24String(m);}catch{$('csvText').textContent='Lengkapi nama file, rekening debit, kode cabang, dan keterangan untuk melihat isi file R24.';}
+        $('csvFormatNote').textContent='Pemisah | · 15 kolom · tanpa judul · tanpa BOM';
+      }else{
+        $('csvHead').innerHTML='<tr><th>A · Referensi</th><th>B · Rekening</th><th>C</th><th class="num">D · Nominal</th><th>E · Tanggal</th></tr>';
+        $('csvBody').innerHTML=shown.map((r,i)=>`<tr class="${start+i===0?'master-row':''}"><td class="ref">${esc(r[0]||'—')}</td><td class="account">${esc(r[1]||'—')}</td><td>IDR</td><td class="num">${esc(r[3])}</td><td>${r[4]}</td></tr>`).join('');
+        try {$('csvText').textContent=csvString(m);}catch{$('csvText').textContent='Perbaiki nama file dan rekening master untuk melihat teks CSV.';}
+        $('csvFormatNote').textContent='Koma · 5 kolom · tanpa BOM';
+      }
       $('csvRange').textContent=(start+1)+'–'+(start+shown.length)+' dari '+rows.length+' baris';
       $('csvPage').textContent=state.csvPage+' / '+pages;$('csvPrev').disabled=state.csvPage<=1;$('csvNext').disabled=state.csvPage>=pages;
       $('csvTableWrap').hidden=state.csvView!=='table';$('csvText').hidden=state.csvView!=='text';$('csvPagination').hidden=state.csvView!=='table';$('csvFormatNote').hidden=state.csvView!=='text';
       for(const [id,view] of [['csvTableBtn','table'],['csvTextBtn','text']]){$(id).classList.toggle('active',state.csvView===view);$(id).setAttribute('aria-pressed',String(state.csvView===view));}
+    }
+    // Bulk R24: tinggi area isian master mengikuti bawah kartu preview, sisanya digulir.
+    function masterScrollHint() {
+      const box=document.querySelector('.master-fields');
+      box.classList.toggle('more-below',isR24()&&box.scrollHeight-box.scrollTop-box.clientHeight>4);
+    }
+    function fitMasterFields(settle=false) {
+      const box=document.querySelector('.master-fields');
+      if(!isR24()||window.innerWidth<=680||$('workspaceView').hidden){box.style.maxHeight='';masterScrollHint();return;}
+      const card=box.closest('.card'),preview=document.querySelector('.preview-card');
+      const style=getComputedStyle(card),pad=(parseFloat(style.paddingBottom)||22)+(parseFloat(style.borderBottomWidth)||0);
+      const room=preview.getBoundingClientRect().bottom-box.getBoundingClientRect().top-pad;
+      box.style.maxHeight=Math.max(90,Math.floor(room))+'px';
+      masterScrollHint();
+      if(!settle)requestAnimationFrame(()=>fitMasterFields(true));
+    }
+    function renderMode() {
+      const r24=isR24();
+      document.querySelectorAll('.r24-only').forEach(el=>{el.hidden=!r24;});
+      $('workspaceView').classList.toggle('mode-r24',r24);
+      fitMasterFields();
+      $('modeEyebrow').textContent='BULK PAYMENT · '+(r24?'R24':'T24');
+      $('masterAccountLabel').textContent=r24?'Rekening debit':'Rekening master';
+      $('masterAccount').placeholder=r24?'Rekening yang didebet':'Rekening sumber dana';
+      $('processDateLabel').textContent=r24?'Tanggal valuta':'Tanggal proses';
+      $('r24Details').disabled=$('r24SameDetails').checked;
+      if($('r24SameDetails').checked)$('r24Details').value=r24Text($('r24Ref').value);
+      $('csvTab').textContent=r24?'Preview R24':'Preview CSV';
+      $('csvText').setAttribute('aria-label',r24?'Isi file R24 dengan pemisah garis tegak':'Isi CSV dengan pemisah koma');
+      if($('workspaceView').hidden)return;
+      document.querySelectorAll('[data-view]').forEach(b=>{const active=b.dataset.view==='workspace'&&b.dataset.mode===state.mode;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
     }
     function refresh() {
       refreshDates();
       const hasData=!!state.rows.length;
       $('emptyState').hidden=hasData;$('populatedState').hidden=!hasData;$('fileInfo').hidden=!hasData;$('rematchBtn').hidden=!hasData;
       $('previewLabel').textContent=hasData?(unmatchedCount()?unmatchedCount()+' rekening tidak ada di acuan':'Sudah dicocokkan'):'Belum ada data';
-      $('recipientCount').textContent=state.rows.length+' penerima';$('totalAmount').textContent=money(state.total);
+      $('recipientCount').textContent=state.rows.length+' penerima';$('totalAmount').textContent=moneyCents(state.totalCents);
+      renderMode();
       $('fileName').textContent=state.file?.name||'';$('sheetLabel').textContent=state.mapping?state.mapping.sheet+' · baris '+state.mapping.startRow+'–'+state.mapping.endRow:'';
       for(const [id,tab] of [['dataTab','data'],['csvTab','csv']]){$(id).classList.toggle('active',state.tab===tab);$(id).setAttribute('aria-selected',String(state.tab===tab));}
       $('dataPanel').hidden=state.tab!=='data';$('csvPanel').hidden=state.tab!=='csv';
@@ -990,11 +1091,12 @@
     }
     function showHistoryPage(shown,total,start) {
       const pages=Math.max(1,Math.ceil(total/HISTORY_PAGE_SIZE));
-      $('historyEmpty').textContent='Belum ada CSV yang diunduh.';
+      const r24=state.historyKind==='r24';
+      $('historyEmpty').textContent=r24?'Belum ada file R24 yang diunduh.':'Belum ada CSV yang diunduh.';
       $('historyEmpty').hidden=!!total;$('exportHistoryBtn').disabled=!total;
       $('historyBody').innerHTML=shown.map(x=>{
         const at=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',dateStyle:'medium',timeStyle:'short'}).format(new Date(x.at));
-        return `<tr><td class="file-label">${esc(x.name)}.csv</td><td>${esc(at)}</td><td class="num">${x.count}</td><td class="num">${money(x.total)}</td></tr>`;
+        return `<tr><td class="file-label">${esc(x.name)}.csv</td><td>${esc(at)}</td><td class="num">${x.count}</td><td class="num">${r24?moneyCents(x.total):money(x.total)}</td></tr>`;
       }).join('');
       $('historyPagination').hidden=!total;
       $('historyRange').textContent=total?(start+1)+'–'+(start+shown.length)+' dari '+total+' file':'';
@@ -1004,16 +1106,18 @@
       refreshStorageLabel();
     }
     function showLocalHistory() {
-      const entries=[...readHistory()].reverse();
+      const r24=state.historyKind==='r24',entries=[...readHistory(state.historyKind)].reverse();
       const pages=Math.max(1,Math.ceil(entries.length/HISTORY_PAGE_SIZE));
       state.historyPage=Math.min(Math.max(1,state.historyPage),pages);
       const start=(state.historyPage-1)*HISTORY_PAGE_SIZE;
       historySource='local';
-      $('historyDescription').textContent='Riwayat unduhan di browser ini.';
+      $('historyDescription').textContent=r24?'Riwayat Bulk R24 di browser ini.':'Riwayat unduhan di browser ini.';
       showHistoryPage(entries.slice(start,start+HISTORY_PAGE_SIZE),entries.length,start);
     }
     async function renderHistory() {
       const requestId=++historyRequestId;
+      for(const [id,kind] of [['historyT24Btn','t24'],['historyR24Btn','r24']]){$(id).classList.toggle('active',state.historyKind===kind);$(id).setAttribute('aria-pressed',String(state.historyKind===kind));}
+      if(state.historyKind==='r24'){showLocalHistory();return;}
       if(!databaseReady||readHistory().some(x=>x.eventId&&!x.syncedAt)){showLocalHistory();return;}
       const start=(state.historyPage-1)*HISTORY_PAGE_SIZE;
       $('historyEmpty').textContent='Memuat riwayat bersama…';
@@ -1032,7 +1136,7 @@
         const rows=await response.json();
         const match=response.headers.get('Content-Range')?.match(/\/(\d+)$/);
         if(!Array.isArray(rows)||!match)throw new Error('Format riwayat tidak valid.');
-        if(requestId!==historyRequestId)return;
+        if(requestId!==historyRequestId||state.historyKind!=='t24')return;
         const total=Number(match[1]);
         if(start>=total&&state.historyPage>1){state.historyPage=Math.max(1,Math.ceil(total/HISTORY_PAGE_SIZE));void renderHistory();return;}
         historyConnectionError=false;
@@ -1040,7 +1144,7 @@
         $('historyDescription').textContent='';
         showHistoryPage(rows.map(x=>({name:x.file_name,at:x.downloaded_at,count:x.recipient_count,total:String(x.total_amount)})),total,start);
       } catch {
-        if(requestId!==historyRequestId)return;
+        if(requestId!==historyRequestId||state.historyKind!=='t24')return;
         historyConnectionError=true;
         showLocalHistory();
       }
@@ -1063,6 +1167,27 @@
       if(state.duplicates.length)notes.push(state.duplicates.length+' rekening berulang tetap diekspor sebagai transaksi terpisah.');
       if(!storageAvailable)notes.push('Riwayat hanya tersedia selama sesi ini.');
       state.exporting=true;$('downloadBtn').disabled=true;
+      if(isR24()){
+        try {
+          const answer=await dialog({title:'Unduh file Bulk R24?',html:`<div class="confirm-summary"><div class="confirm-row"><span>File</span><strong>${esc(m.name)}.csv</strong></div><div class="confirm-row"><span>Rekening debit</span><strong>${esc(m.account)}</strong></div><div class="confirm-row"><span>Kode cabang</span><strong>${esc(m.coCode)}</strong></div><div class="confirm-row"><span>Keterangan</span><strong>${esc(m.ref)}</strong></div><div class="confirm-row"><span>Payment details</span><strong>${esc(m.details)}</strong></div><div class="confirm-row"><span>Baris sumber</span><strong>${state.mapping.startRow}–${state.mapping.endRow}</strong></div><div class="confirm-row"><span>Jumlah baris</span><strong>${state.rows.length}</strong></div><div class="confirm-row"><span>Total</span><strong>${moneyCents(state.totalCents)}</strong></div><div class="confirm-row"><span>Tanggal valuta</span><strong>${dateLabel()} · ${m.date}</strong></div></div><p class="help-note">Setelah commit di Upload FT Batch, pastikan Rows Processed = ${state.rows.length} dan Amount Process = ${esc(r24Amount(state.totalCents))}.${notes.length?' '+esc(notes.join(' ')):''}</p>`,showCancelButton:true,confirmButtonText:'Unduh file R24',cancelButtonText:'Periksa lagi',allowOutsideClick:false});
+          if(!answer.isConfirmed)return;
+          if(dateCode()!==m.date){refreshDates();notify('Tanggal sudah berganti. Periksa preview lalu unduh kembali.','info');return;}
+          const content=r24String(m);
+          const reserve=async()=>{
+            if(dateCode()!==m.date)throw new Error('Tanggal sudah berganti. Periksa preview lalu unduh kembali.');
+            if(isUsed(m.name,'r24'))throw new Error('Nama file sudah digunakan. Buat nama baru.');
+            saveHistory([...readHistory('r24'),{name:m.name,at:new Date().toISOString(),date:m.date,count:state.rows.length,total:state.totalCents.toString()}],'r24');
+            saveDownload(content,m.name+'.csv');
+          };
+          if(navigator.locks?.request)await navigator.locks.request('bulkgo-export',reserve);else await reserve();
+          try{localStorage.setItem(R24_COCODE_KEY,m.coCode);}catch{}
+          state.historyPage=1;
+          notify('File R24 siap. Langsung upload di Upload FT Batch; tidak perlu dibuka Notepad atau disimpan ulang.','success');
+          state.tab='csv';
+        } catch(e){notify(e.message||'File R24 gagal disiapkan.','error');}
+        finally{state.exporting=false;refresh();}
+        return;
+      }
       try {
         const answer=await dialog({title:'Unduh pembayaran?',html:`<div class="confirm-summary"><div class="confirm-row"><span>File</span><strong>${esc(m.name)}.csv</strong></div><div class="confirm-row"><span>Rekening master</span><strong>${esc(m.account)}</strong></div><div class="confirm-row"><span>Baris sumber</span><strong>${state.mapping.startRow}–${state.mapping.endRow}</strong></div><div class="confirm-row"><span>Penerima</span><strong>${state.rows.length}</strong></div><div class="confirm-row"><span>Total</span><strong>${money(state.total)}</strong></div><div class="confirm-row"><span>Tanggal</span><strong>${dateLabel()} · ${m.date}</strong></div></div>${notes.length?'<p class="help-note">'+esc(notes.join(' '))+'</p>':''}`,showCancelButton:true,confirmButtonText:'Unduh CSV',cancelButtonText:'Periksa lagi',allowOutsideClick:false});
         if(!answer.isConfirmed)return;
@@ -1092,7 +1217,7 @@
     async function resetWorkspace() {
       if(state.reading||state.exporting)return;
       if(state.rows.length){const answer=await dialog({title:'Mulai pembayaran baru?',text:'Data yang sedang dibuka akan dikosongkan. Riwayat nama file tetap tersimpan.',showCancelButton:true,confirmButtonText:'Reset',cancelButtonText:'Batal'});if(!answer.isConfirmed)return;}
-      Object.assign(state,{workbook:null,file:null,mapping:null,rows:[],total:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1});
+      Object.assign(state,{workbook:null,file:null,mapping:null,rows:[],total:0n,totalCents:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1});
       $('masterAccount').value='';$('searchInput').value='';$('fileInput').value='';suggestName();refresh();
     }
 
@@ -1118,17 +1243,42 @@
     $('downloadBtn').addEventListener('click',downloadCsv);$('resetBtn').addEventListener('click',resetWorkspace);
     $('historyPrev').addEventListener('click',()=>{if(state.historyPage>1){state.historyPage--;void renderHistory();}});
     $('historyNext').addEventListener('click',()=>{state.historyPage++;void renderHistory();});
-    document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
-      const history=btn.dataset.view==='history';$('workspaceView').hidden=history;$('historyView').hidden=!history;
+    async function switchMode(mode) {
+      if(mode===state.mode)return true;
+      if(state.reading||state.exporting)return false;
+      if(state.rows.length){
+        const answer=await dialog({title:'Pindah ke Bulk '+mode.toUpperCase()+'?',text:'Data bendahara yang sedang dibuka akan dikosongkan karena format file '+mode.toUpperCase()+' berbeda. Acuan rekening dan riwayat tetap tersimpan.',showCancelButton:true,confirmButtonText:'Pindah',cancelButtonText:'Batal'});
+        if(!answer.isConfirmed)return false;
+      }
+      Object.assign(state,{mode,workbook:null,file:null,mapping:null,rows:[],total:0n,totalCents:0n,duplicates:[],sourceTotal:null,tab:'data',csvView:'table',dataPage:1,csvPage:1});
+      $('searchInput').value='';$('fileInput').value='';suggestName();
+      return true;
+    }
+    document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',async()=>{
+      const history=btn.dataset.view==='history';
+      if(!history&&!await switchMode(btn.dataset.mode))return;
+      if(history){state.historyKind=state.mode;state.historyPage=1;}
+      $('workspaceView').hidden=history;$('historyView').hidden=!history;
       document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b===btn);if(b===btn)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+      refresh();
       if(history){void renderHistory();void syncHistory();}
       companion.hide();companion.schedule(true);
     }));
+    for(const [id,kind] of [['historyT24Btn','t24'],['historyR24Btn','r24']])$(id).addEventListener('click',()=>{if(state.historyKind===kind)return;state.historyKind=kind;state.historyPage=1;void renderHistory();});
+    for(const id of ['r24CoCode','r24Ref','r24Details'])$(id).addEventListener('input',refresh);
+    document.querySelector('.master-fields').addEventListener('scroll',masterScrollHint,{passive:true});
+    window.addEventListener('resize',()=>fitMasterFields(),{passive:true});
+    document.fonts?.ready.then(()=>fitMasterFields());setTimeout(()=>fitMasterFields(),700);
+    $('r24CoCode').addEventListener('blur',()=>{$('r24CoCode').value=$('r24CoCode').value.trim().replace(/\s/g,'').toUpperCase();refresh();});
+    for(const id of ['r24Ref','r24Details'])$(id).addEventListener('blur',()=>{$(id).value=r24Text($(id).value);refresh();});
+    $('r24SameDetails').addEventListener('change',()=>{if(!$('r24SameDetails').checked){$('r24Details').disabled=false;$('r24Details').focus();}refresh();});
+    try{$('r24CoCode').value=localStorage.getItem(R24_COCODE_KEY)||'';}catch{}
     $('exportHistoryBtn').addEventListener('click',async()=>{
       $('exportHistoryBtn').disabled=true;
       try {
-        let history=readHistory();
-        if(historySource==='shared'&&databaseReady){
+        const kind=state.historyKind;
+        let history=readHistory(kind);
+        if(kind==='t24'&&historySource==='shared'&&databaseReady){
           history=[];
           for(let offset=0;;offset+=500){
             const url=new URL(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/bulkgo_usage');
@@ -1145,14 +1295,14 @@
           }
         }
         if(!history.length)return;
-        const content=JSON.stringify({app:'Bulk Go',exportedAt:new Date().toISOString(),files:history},null,2);
-        saveDownload(content,'bulkgo-riwayat-'+dateCode()+'.json','application/json');
+        const content=JSON.stringify({app:'Bulk Go',type:kind==='r24'?'Bulk R24':'Bulk T24',exportedAt:new Date().toISOString(),...(kind==='r24'?{totalUnit:'sen (dibagi 100 = rupiah)'}:{}),files:history},null,2);
+        saveDownload(content,'bulkgo-riwayat-'+kind+'-'+dateCode()+'.json','application/json');
         notify('Riwayat disimpan.','success');
       }catch(e){notify(e.message||'Riwayat gagal disimpan.','error');}
       finally{$('exportHistoryBtn').disabled=false;}
     });
-    $('helpBtn').addEventListener('click',()=>dialog({title:'Cara pakai',html:'<ol class="help-list"><li>Isi cabang/kabupaten dan unggah laporan gaji sebagai acuan. Periksa sheet, kolom rekening, serta baris awal dan akhir. Hanya nomor rekening yang disimpan di browser ini.</li><li>Unggah Excel bendahara. Periksa kolom rekening, nominal, dan rentang baris. Rekening yang tidak ditemukan pada acuan akan berwarna merah di Data bendahara. Klik rekening untuk mengeditnya secara manual.</li><li>Jika ada pecahan nominal, aktifkan Bulatkan ke rupiah terdekat dan periksa preview. Isi rekening master dan nama file, lalu periksa CSV sebelum mengunduh.</li><li>Saat sudah unduh CSV, silahkan buka kembali file CSV-nya lalu lakukan save dengan mengetik Ctrl + S</li><i>CSV siap diupload di T24. Selesai</i></ol><p class="help-note">Acuan bisa diganti untuk cabang lain. Koneksi internet diperlukan untuk pembaca Excel.</p>',confirmButtonText:'Mengerti',width:610}));
-    window.addEventListener('storage',e=>{if(e.key===HISTORY_KEY){refresh();if(!$('historyView').hidden)void renderHistory();}});
+    $('helpBtn').addEventListener('click',()=>isR24()?dialog({title:'Cara pakai Bulk R24',html:'<ol class="help-list"><li>Pastikan acuan rekening cabang sudah tersimpan. Acuan yang sama dipakai untuk T24 dan R24.</li><li>Unggah Excel bendahara, lalu periksa kolom rekening, nominal, dan rentang baris. Nominal boleh punya maks. 2 angka desimal. Tanda seperti \' atau # di rekening dibersihkan otomatis.</li><li>Rekening merah tidak ada di acuan. Klik rekening untuk mengeditnya. Rekening internal seperti IDR1281900160001 boleh diketik langsung.</li><li>Isi rekening debit, kode cabang (CO.CODE), dan keterangan maks. 16 karakter. Gunakan huruf, angka, dan spasi saja. Payment details bisa disamakan dengan keterangan.</li><li>Unduh file, lalu langsung upload di Upload Menu → Upload File Batch → Upload FT. Tidak perlu dibuka di Notepad, mengganti koma, atau Ctrl + S.</li><li>Setelah commit, cocokkan Rows Processed dan Amount Process dengan ringkasan di Bulk Go.</li></ol><p class="help-note">Riwayat Bulk R24 hanya tersimpan di browser ini.</p>',confirmButtonText:'Mengerti',width:610}):dialog({title:'Cara pakai',html:'<ol class="help-list"><li>Isi cabang/kabupaten dan unggah laporan gaji sebagai acuan. Periksa sheet, kolom rekening, serta baris awal dan akhir. Hanya nomor rekening yang disimpan di browser ini.</li><li>Unggah Excel bendahara. Periksa kolom rekening, nominal, dan rentang baris. Rekening yang tidak ditemukan pada acuan akan berwarna merah di Data bendahara. Klik rekening untuk mengeditnya secara manual.</li><li>Jika ada pecahan nominal, aktifkan Bulatkan ke rupiah terdekat dan periksa preview. Isi rekening master dan nama file, lalu periksa CSV sebelum mengunduh.</li><li>Saat sudah unduh CSV, silahkan buka kembali file CSV-nya lalu lakukan save dengan mengetik Ctrl + S</li><i>CSV siap diupload di T24. Selesai</i></ol><p class="help-note">Acuan bisa diganti untuk cabang lain. Koneksi internet diperlukan untuk pembaca Excel.</p>',confirmButtonText:'Mengerti',width:610}));
+    window.addEventListener('storage',e=>{if(e.key===HISTORY_KEY||e.key===HISTORY_KEYS.r24){refresh();if(!$('historyView').hidden)void renderHistory();}});
     window.addEventListener('online',()=>{void syncHistory();if(!$('historyView').hidden)void renderHistory();});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();if(!$('historyView').hidden)void renderHistory();}});
     setInterval(refreshDates,30000);
